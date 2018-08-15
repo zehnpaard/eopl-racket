@@ -104,3 +104,77 @@
   (if (null? xs)
     #f
     (or (pred (car xs)) (exists? pred (cdr xs)))))
+
+;1.26
+(define (up xs)
+  (define (concat xs ys)
+    (if (null? xs)
+      ys
+      (cons (car xs) (concat (cdr xs) ys))))
+  (if (null? xs)
+   xs
+  (let ((x (car xs)))
+    (if (symbol? x)
+      (cons x (up (cdr xs)))
+      (concat x (up (cdr xs)))))))
+
+;1.27
+(define (flatten xs)
+  (define (flatten-acc xs ys)
+    (if (null? xs)
+      ys
+      (let ((x (car xs)))
+        (if (symbol? x)
+          (cons x (flatten-acc (cdr xs) ys))
+          (flatten-acc x (flatten-acc (cdr xs) ys))))))
+  (flatten-acc xs '()))
+
+;1.28
+(define (merge xs ys)
+  (cond
+    ((null? xs) ys)
+    ((null? ys) xs)
+    (else
+     (let ((x (car xs))
+           (y (car ys)))
+       (if (< x y)
+         (cons x (merge (cdr xs) ys))
+         (cons y (merge xs (cdr ys))))))))
+
+;1.29
+(define (sort xs)
+  (define (merge-pairs xs)
+    (if (< (length xs) 2)
+      xs
+      (cons (merge (car xs) (cadr xs))
+            (merge-pairs (cddr xs)))))
+  (define (sort-lists xs)
+    (cond
+      ((null? xs) xs)
+      ((= 1 (length xs)) (car xs))
+      (else (sort-lists (merge-pairs xs)))))
+  (sort-lists (down xs)))
+
+;1.30
+(define (sort/predicate pred xs)
+  (define (merge xs ys)
+    (cond
+      ((null? xs) ys)
+      ((null? ys) xs)
+      (else
+       (let ((x (car xs))
+             (y (car ys)))
+         (if (pred x y)
+           (cons x (merge (cdr xs) ys))
+           (cons y (merge xs (cdr ys))))))))
+  (define (merge-pairs xs)
+    (if (< (length xs) 2)
+      xs
+      (cons (merge (car xs) (cadr xs))
+            (merge-pairs (cddr xs)))))
+  (define (sort-lists xs)
+    (cond
+      ((null? xs) xs)
+      ((= 1 (length xs)) (car xs))
+      (else (sort-lists (merge-pairs xs)))))
+  (sort-lists (down xs)))
