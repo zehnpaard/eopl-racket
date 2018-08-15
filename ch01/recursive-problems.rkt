@@ -62,3 +62,45 @@
          (if (eq? x y) 1 0)
          (count-occurrences y x)))
      (count-occurrences y (cdr xs)))))
+
+;1.21
+(define (product ss1 ss2)
+  (define (add-tuples s ss ts)
+    (if (null? ss)
+      ts
+      (add-tuples s (cdr ss) (cons (list s (car ss)) ts))))
+  (define (product-acc ss1 ss2 ts)
+    (if (null? ss1)
+      ts
+      (product-acc (cdr ss1) ss2 (add-tuples (car ss1) ss2 ts))))
+  (product-acc ss1 ss2 '()))
+
+;1.22
+(define (filter-in pred xs)
+  (if (null? xs)
+    xs
+    (let ((x (car xs)))
+      (if (pred x)
+        (cons x (filter-in pred (cdr xs)))
+        (filter-in pred (cdr xs))))))
+
+;1.23
+(define (list-index pred xs)
+  (define (list-index-num pred xs n)
+    (cond
+      ((null? xs) #f)
+      ((pred (car xs)) n)
+      (else (list-index-num pred (cdr xs) (inc n)))))
+  (list-index-num pred xs 0))
+
+;1.24
+(define (every? pred xs)
+  (if (null? xs)
+    #t
+    (and (pred (car xs)) (every? pred (cdr xs)))))
+
+;1.25
+(define (exists? pred xs)
+  (if (null? xs)
+    #f
+    (or (pred (car xs)) (exists? pred (cdr xs)))))
