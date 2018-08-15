@@ -242,3 +242,18 @@
           (list (list (car b) (car left) (car right))
                 (cadr right))))))
   (number-leaves-n b 0))
+
+;1.36
+(define (g x ys)
+  (define (inc-first xs)
+    (cons (inc (car xs)) (cdr xs)))
+  (define (inc-all-firsts xs)
+    (if (null? xs)
+      xs
+      (cons (inc-first (car xs)) (inc-all-firsts (cdr xs)))))
+  (cons x (inc-all-firsts ys)))
+
+(define (number-elements xs)
+  (if (null? xs)
+    xs
+    (g (list 0 (car xs)) (number-elements (cdr xs)))))
