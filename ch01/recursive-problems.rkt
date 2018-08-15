@@ -178,3 +178,67 @@
       ((= 1 (length xs)) (car xs))
       (else (sort-lists (merge-pairs xs)))))
   (sort-lists (down xs)))
+
+;1.31
+(define (leaf n)
+  n)
+(define (interior-node s b1 b2)
+  (list s b1 b2))
+(define leaf? number?)
+(define lson cadr)
+(define rson caddr)
+(define (contents-of b)
+  (define (contents-of-acc b ns)
+    (if (leaf? b)
+      (cons b ns)
+      (contents-of-acc (cadr b) (contents-of-acc (caddr b) ns))))
+  (contents-of-acc b '()))
+
+;1.32
+(define (double-tree b)
+  (if (leaf? b)
+    (* b 2)
+    (list (car b) (double-tree (lson b)) (double-tree (rson b)))))
+
+;1.33
+(define my-tree
+  (interior-node 'red
+    (interior-node 'bar
+      (leaf 26)
+      (leaf 12))
+    (interior-node 'red
+      (leaf 11)
+      (interior-node 'quux
+        (leaf 117)
+        (leaf 14)))))
+
+(define (mark-leaves-with-red-depth b)
+  (define (mark-with-count b n)
+    (if (leaf? b)
+      n
+      (let ((m (+ n
+                  (if (eq? (car b) 'red) 1 0))))
+        (list (car b)
+              (mark-with-count (lson b) m)
+              (mark-with-count (rson b) m)))))
+  (mark-with-count b 0))
+
+;1.34
+(define (path n b)
+  (let ((m (car b)))
+    (cond
+      ((< n m) (cons 'left (path n (lson b))))
+      ((> n m) (cons 'right (path n (rson b))))
+      (else '()))))
+
+
+;1.35
+(define (number-leaves b)
+  (define (number-leaves-n b n)
+    (if (leaf? b)
+      (list n (inc n))
+      (let ((left (number-leaves-n (lson b) n)))
+        (let ((right (number-leaves-n (rson b) (cadr left))))
+          (list (list (car b) (car left) (car right))
+                (cadr right))))))
+  (number-leaves-n b 0))
