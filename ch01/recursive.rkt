@@ -36,7 +36,6 @@
     (else
      (cons (car xs) (remove x (cdr xs))))))
 
-
 (define (number-elements xs)
   (define (number-elements-from xs n)
     (if (null? xs)
