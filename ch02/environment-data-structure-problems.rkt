@@ -18,3 +18,23 @@
 
 (define (report-error)
   (eopl:error 'apply-env "Some error!"))
+
+;2.8
+(define (empty-env? env)
+  (null? env))
+
+;2.9
+(define (has-binding? env var)
+  (if (null? env)
+    #f
+    (or (eq? (car (car env)) var)
+        (has-binding? (cdr env) var))))
+
+;2.10
+(define (extend-env* vars vals env)
+  (if (or (null? vars) (null? vals))
+    env
+    (extend-env
+     (car vars)
+     (car vals)
+     (extend-env* (cdr vars) (cdr vals) env))))
