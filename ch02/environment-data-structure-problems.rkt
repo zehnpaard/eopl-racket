@@ -1,5 +1,18 @@
 #lang eopl
 
+;2.4
+(define (empty-stack)
+  '())
+
+(define push cons)
+
+(define (pop stack)
+  (list (car stack) (cdr stack)))
+
+(define top car)
+
+(define empty-stack? null?)
+
 ;2.5
 (define (empty-env)
   '())
