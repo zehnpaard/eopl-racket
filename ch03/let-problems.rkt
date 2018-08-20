@@ -1,6 +1,6 @@
 #lang eopl
 
-;Problems 3.6, 3.7, 3.8
+;Problems 3.6, 3.7, 3.8, 3.9, 3.10
 
 (define (empty-env)
   '())
@@ -18,11 +18,24 @@
 
 (define identifier? symbol?)
 
+(define (all p xs)
+  (if (null? xs)
+    #t
+    (and (p (car xs))
+         (all p (cdr xs)))))
+
+(define (list-of p)
+  (lambda (xs)
+    (and (list? xs)
+         (all p xs))))
+
 (define-datatype expval expval?
   (num-val
    (num number?))
   (bool-val
-   (bool boolean?)))
+   (bool boolean?))
+  (list-val
+   (lst (list-of expval?))))
 
 (define (expval->num val)
   (cases expval val
@@ -37,6 +50,13 @@
      bool)
     (else
      (eopl:error 'expval->bool "Cannot convert value ~s to boolean" val))))
+
+(define (expval->list val)
+  (cases expval val
+    (list-val (lst)
+     lst)
+    (else
+     (eopl:error 'expval->list "Cannot convert value ~s to list" val))))
 
 (define-datatype program program?
   (a-program
@@ -79,7 +99,19 @@
     (exp1 expression?)
     (body expression?))
   (minus-exp
-   (exp1 expression?)))
+   (exp1 expression?))
+  (cons-exp
+   (exp1 expression?)
+   (exp2 expression?))
+  (emptylist-exp)
+  (car-exp
+   (exp1 expression?))
+  (cdr-exp
+   (exp1 expression?))
+  (null?-exp
+   (exp1 expression?))
+  (list-exp
+   (exps (list-of expression?))))
 
 (define (init-env)
   (extend-env
@@ -139,7 +171,25 @@
     (let-exp (var exp1 body)
       (value-of body (extend-env var (value-of exp1 env) env)))
     (minus-exp (exp1)
-      (num-val (- (expval->num (value-of exp1 env)))))))
+      (num-val (- (expval->num (value-of exp1 env)))))
+    (cons-exp (exp1 exp2)
+      (list-val
+       (cons (value-of exp1 env)
+             (expval->list (value-of exp2 env)))))
+    (emptylist-exp ()
+      (list-val '()))
+    (car-exp (exp1)
+      (car (expval->list (value-of exp1 env))))
+    (cdr-exp (exp1)
+      (list-val
+       (cdr (expval->list (value-of exp1 env)))))
+    (null?-exp (exp1)
+      (bool-val
+       (null? (expval->list exp1))))
+    (list-exp (exps)
+      (list-val
+       (map (lambda (e) (value-of e env)) exps)))
+    ))
 
 (define exp1
   (diff-exp (var-exp 'x) (const-exp 2)))
@@ -156,3 +206,13 @@
 (define pgm2
   (a-program exp2))
 
+(define exp3
+  (cons-exp
+   (cons-exp
+    (const-exp 1)
+    (emptylist-exp))
+   (cons-exp
+    (const-exp 2)
+    (cons-exp
+     (const-exp 3)
+     (emptylist-exp)))))
