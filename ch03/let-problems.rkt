@@ -1,6 +1,6 @@
 #lang eopl
 
-;Problems 3.6, 3.7, 3.8, 3.9, 3.10
+;Problems 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
 
 (define (empty-env)
   '())
@@ -65,33 +65,23 @@
 (define-datatype expression expression?
   (const-exp
     (num number?))
-  (diff-exp
+  (num2->num-exp
+    (op procedure?)
     (exp1 expression?)
     (exp2 expression?))
-  (add-exp
-    (exp1 expression?)
-    (exp2 expression?))
-  (mul-exp
-    (exp1 expression?)
-    (exp2 expression?))
-  (quot-exp
-    (exp1 expression?)
-    (exp2 expression?))
-  (zero?-exp
+  (num->bool-exp
+    (op procedure?)
     (exp1 expression?))
-  (equal?-exp
-    (exp1 expression?)
-    (exp2 expression?))
-  (greater?-exp
-    (exp1 expression?)
-    (exp2 expression?))
-  (less?-exp
+  (num2->bool-exp
+    (op procedure?)
     (exp1 expression?)
     (exp2 expression?))
   (if-exp
     (exp1 expression?)
     (exp2 expression?)
     (exp3 expression?))
+  (cond-exp
+    (exp-pairs (list-of (list-of expression?))))
   (var-exp
     (var identifier?))
   (let-exp
@@ -131,41 +121,23 @@
   (cases expression exp
     (const-exp (num)
      (num-val num))
-    (diff-exp (exp1 exp2)
+    (num2->num-exp (op exp1 exp2)
      (num-val
-      (- (expval->num (value-of exp1 env))
-         (expval->num (value-of exp2 env)))))
-    (add-exp (exp1 exp2)
-     (num-val
-      (+ (expval->num (value-of exp1 env))
-         (expval->num (value-of exp2 env)))))
-    (mul-exp (exp1 exp2)
-     (num-val
-      (* (expval->num (value-of exp1 env))
-         (expval->num (value-of exp2 env)))))
-    (quot-exp (exp1 exp2)
-     (num-val
-      (quotient (expval->num (value-of exp1 env))
-                (expval->num (value-of exp2 env)))))
-    (zero?-exp (exp1)
+      (op (expval->num (value-of exp1 env))
+          (expval->num (value-of exp2 env)))))
+    (num->bool-exp (op exp1)
      (bool-val
-      (zero? (expval->num (value-of exp1 env)))))
-    (equal?-exp (exp1 exp2)
+      (op (expval->num (value-of exp1 env)))))
+    (num2->bool-exp (op exp1 exp2)
      (bool-val
-      (= (expval->num (value-of exp1 env))
-         (expval->num (value-of exp2 env)))))
-    (greater?-exp (exp1 exp2)
-     (bool-val
-      (> (expval->num (value-of exp1 env))
-         (expval->num (value-of exp2 env)))))
-    (less?-exp (exp1 exp2)
-     (bool-val
-      (< (expval->num (value-of exp1 env))
-         (expval->num (value-of exp2 env)))))
+      (op (expval->num (value-of exp1 env))
+          (expval->num (value-of exp2 env)))))
     (if-exp (exp1 exp2 exp3)
       (if (expval->bool (value-of exp1 env))
         (value-of exp2 env)
         (value-of exp3 env)))
+    (cond-exp (exp-pairs)
+      (value-of-cond exp-pairs env))
     (var-exp (var)
       (apply-env env var))
     (let-exp (var exp1 body)
@@ -190,6 +162,33 @@
       (list-val
        (map (lambda (e) (value-of e env)) exps)))
     ))
+
+(define (value-of-cond pairs env)
+  (if (null? pairs)
+    (eopl:error 'value-of-cond "No condition succeeded")
+    (if (expval->bool (value-of (car (car pairs)) env))
+      (value-of (cadr (car pairs)) env)
+      (value-of-cond (cdr pairs) env))))
+
+(define (diff-exp exp1 exp2)
+  (num2->num-exp - exp1 exp2))
+(define (add-exp exp1 exp2)
+  (num2->num-exp + exp1 exp2))
+(define (mul-exp exp1 exp2)
+  (num2->num-exp * exp1 exp2))
+(define (quot-exp exp1 exp2)
+  (num2->num-exp quotient exp1 exp2))
+
+(define (zero?-exp exp1)
+  (num->bool-exp zero? exp1))
+
+(define (equal?-exp exp1 exp2)
+  (num2->bool-exp = exp1 exp2))
+(define (greater?-exp exp1 exp2)
+  (num2->bool-exp > exp1 exp2))
+(define (less?-exp exp1 exp2)
+  (num2->bool-exp < exp1 exp2))
+
 
 (define exp1
   (diff-exp (var-exp 'x) (const-exp 2)))
