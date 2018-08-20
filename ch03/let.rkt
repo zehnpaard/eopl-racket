@@ -93,4 +93,19 @@
     (var-exp (var)
       (apply-env env var))
     (let-exp (var exp1 body)
-      (value-of body (extend-env var exp1 env)))))
+      (value-of body (extend-env var (value-of exp1 env) env)))))
+
+(define exp1
+  (diff-exp (var-exp 'x) (const-exp 2)))
+
+(define pgm1
+  (a-program exp1))
+
+(define exp2
+  (if-exp (zero?-exp (diff-exp (const-exp 1) (var-exp 'i)))
+    (let-exp 'y (diff-exp (const-exp 5) (const-exp 2))
+      (diff-exp (var-exp 'y) (const-exp 10)))
+    exp1))
+
+(define pgm2
+  (a-program exp2))
