@@ -101,7 +101,10 @@
   (null?-exp
    (exp1 expression?))
   (list-exp
-   (exps (list-of expression?))))
+   (exps (list-of expression?)))
+  (print-op
+   (arg (lambda (x) #t)))
+  )
 
 (define (init-env)
   (extend-env
@@ -161,6 +164,11 @@
     (list-exp (exps)
       (list-val
        (map (lambda (e) (value-of e env)) exps)))
+    (print-op (arg)
+     (begin
+       (write arg)
+       (newline)
+       1))
     ))
 
 (define (value-of-cond pairs env)
