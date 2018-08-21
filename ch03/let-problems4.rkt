@@ -1,6 +1,6 @@
 #lang eopl
 
-;Problems 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
+;Problems 3.16, 3.17
 
 (define (empty-env)
   '())
@@ -80,30 +80,20 @@
     (exp1 expression?)
     (exp2 expression?)
     (exp3 expression?))
-  (cond-exp
-    (exp-pairs (list-of (list-of expression?))))
   (var-exp
     (var identifier?))
   (let-exp
-    (var identifier?)
-    (exp1 expression?)
+    (var-exps (list-of
+                (lambda (x)
+                  (and (identifier? (car x))
+                       (expression? (cadr x))))))
     (body expression?))
-  (minus-exp
-   (exp1 expression?))
-  (cons-exp
-   (exp1 expression?)
-   (exp2 expression?))
-  (emptylist-exp)
-  (car-exp
-   (exp1 expression?))
-  (cdr-exp
-   (exp1 expression?))
-  (null?-exp
-   (exp1 expression?))
-  (list-exp
-   (exps (list-of expression?)))
-  (print-op
-   (arg (lambda (x) #t)))
+  (let*-exp
+    (var-exps (list-of
+                (lambda (x)
+                  (and (identifier? (car x))
+                       (expression? (cadr x))))))
+    (body expression?))
   )
 
 (define (init-env)
@@ -139,87 +129,52 @@
       (if (expval->bool (value-of exp1 env))
         (value-of exp2 env)
         (value-of exp3 env)))
-    (cond-exp (exp-pairs)
-      (value-of-cond exp-pairs env))
     (var-exp (var)
       (apply-env env var))
-    (let-exp (var exp1 body)
-      (value-of body (extend-env var (value-of exp1 env) env)))
-    (minus-exp (exp1)
-      (num-val (- (expval->num (value-of exp1 env)))))
-    (cons-exp (exp1 exp2)
-      (list-val
-       (cons (value-of exp1 env)
-             (expval->list (value-of exp2 env)))))
-    (emptylist-exp ()
-      (list-val '()))
-    (car-exp (exp1)
-      (car (expval->list (value-of exp1 env))))
-    (cdr-exp (exp1)
-      (list-val
-       (cdr (expval->list (value-of exp1 env)))))
-    (null?-exp (exp1)
-      (bool-val
-       (null? (expval->list exp1))))
-    (list-exp (exps)
-      (list-val
-       (map (lambda (e) (value-of e env)) exps)))
-    (print-op (arg)
-     (begin
-       (write arg)
-       (newline)
-       1))
+    (let-exp (var-exps body)
+      (value-of body (extend-env-let var-exps env)))
+    (let*-exp (var-exps body)
+      (value-of body (extend-env-let* var-exps env)))
     ))
 
-(define (value-of-cond pairs env)
-  (if (null? pairs)
-    (eopl:error 'value-of-cond "No condition succeeded")
-    (if (expval->bool (value-of (car (car pairs)) env))
-      (value-of (cadr (car pairs)) env)
-      (value-of-cond (cdr pairs) env))))
+(define (extend-env-let var-exps env)
+  (define (extend-env-let-acc var-exps env acc)
+    (if (null? var-exps)
+      acc
+      (extend-env-let-acc
+       (cdr var-exps)
+       env
+       (extend-env (car (car var-exps))
+                   (value-of (cadr (car var-exps)) env)
+                   acc))))
+  (extend-env-let-acc var-exps env env))                          
+
+(define (extend-env-let* var-exps env)
+  (if (null? var-exps)
+    env
+    (extend-env-let*
+      (cdr var-exps)
+      (extend-env (car (car var-exps))
+                  (value-of (cadr (car var-exps)) env)
+                  env))))
+
 
 (define (diff-exp exp1 exp2)
   (num2->num-exp - exp1 exp2))
-(define (add-exp exp1 exp2)
-  (num2->num-exp + exp1 exp2))
-(define (mul-exp exp1 exp2)
-  (num2->num-exp * exp1 exp2))
-(define (quot-exp exp1 exp2)
-  (num2->num-exp quotient exp1 exp2))
-
 (define (zero?-exp exp1)
   (num->bool-exp zero? exp1))
-
 (define (equal?-exp exp1 exp2)
   (num2->bool-exp = exp1 exp2))
-(define (greater?-exp exp1 exp2)
-  (num2->bool-exp > exp1 exp2))
-(define (less?-exp exp1 exp2)
-  (num2->bool-exp < exp1 exp2))
 
 
-(define exp1
-  (diff-exp (var-exp 'x) (const-exp 2)))
+(value-of-program
+ (a-program
+  (let-exp (list (list 'x (const-exp 5))
+                 (list 'y (diff-exp (var-exp 'x) (const-exp 1))))
+           (var-exp 'y))))
 
-(define pgm1
-  (a-program exp1))
-
-(define exp2
-  (if-exp (zero?-exp (diff-exp (const-exp 1) (var-exp 'i)))
-    (let-exp 'y (diff-exp (const-exp 5) (const-exp 2))
-      (diff-exp (var-exp 'y) (const-exp 10)))
-    exp1))
-
-(define pgm2
-  (a-program exp2))
-
-(define exp3
-  (cons-exp
-   (cons-exp
-    (const-exp 1)
-    (emptylist-exp))
-   (cons-exp
-    (const-exp 2)
-    (cons-exp
-     (const-exp 3)
-     (emptylist-exp)))))
+(value-of-program
+ (a-program
+  (let*-exp (list (list 'x (const-exp 5))
+                 (list 'y (diff-exp (var-exp 'x) (const-exp 1))))
+           (var-exp 'y))))

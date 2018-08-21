@@ -1,6 +1,6 @@
 #lang eopl
 
-;Problems 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
+;Problems 3.13
 
 (define (empty-env)
   '())
@@ -32,8 +32,6 @@
 (define-datatype expval expval?
   (num-val
    (num number?))
-  (bool-val
-   (bool boolean?))
   (list-val
    (lst (list-of expval?))))
 
@@ -44,12 +42,6 @@
     (else
      (eopl:error 'expval->num "Cannot convert value ~s to number" val))))
 
-(define (expval->bool val)
-  (cases expval val
-    (bool-val (bool)
-     bool)
-    (else
-     (eopl:error 'expval->bool "Cannot convert value ~s to boolean" val))))
 
 (define (expval->list val)
   (cases expval val
@@ -101,10 +93,7 @@
   (null?-exp
    (exp1 expression?))
   (list-exp
-   (exps (list-of expression?)))
-  (print-op
-   (arg (lambda (x) #t)))
-  )
+   (exps (list-of expression?))))
 
 (define (init-env)
   (extend-env
@@ -129,16 +118,20 @@
       (op (expval->num (value-of exp1 env))
           (expval->num (value-of exp2 env)))))
     (num->bool-exp (op exp1)
-     (bool-val
-      (op (expval->num (value-of exp1 env)))))
+     (num-val
+      (if (op (expval->num (value-of exp1 env)))
+        1
+        0)))
     (num2->bool-exp (op exp1 exp2)
-     (bool-val
-      (op (expval->num (value-of exp1 env))
-          (expval->num (value-of exp2 env)))))
+     (num-val
+      (if (op (expval->num (value-of exp1 env))
+              (expval->num (value-of exp2 env)))
+        1
+        0)))
     (if-exp (exp1 exp2 exp3)
-      (if (expval->bool (value-of exp1 env))
-        (value-of exp2 env)
-        (value-of exp3 env)))
+      (if (zero? (expval->num (value-of exp1 env)))
+        (value-of exp3 env)
+        (value-of exp2 env)))
     (cond-exp (exp-pairs)
       (value-of-cond exp-pairs env))
     (var-exp (var)
@@ -159,22 +152,19 @@
       (list-val
        (cdr (expval->list (value-of exp1 env)))))
     (null?-exp (exp1)
-      (bool-val
-       (null? (expval->list exp1))))
+      (num-val
+       (if (null? (expval->list exp1))
+         1
+         0)))
     (list-exp (exps)
       (list-val
        (map (lambda (e) (value-of e env)) exps)))
-    (print-op (arg)
-     (begin
-       (write arg)
-       (newline)
-       1))
     ))
 
 (define (value-of-cond pairs env)
   (if (null? pairs)
     (eopl:error 'value-of-cond "No condition succeeded")
-    (if (expval->bool (value-of (car (car pairs)) env))
+    (if (not (zero? (value-of (car (car pairs)) env)))
       (value-of (cadr (car pairs)) env)
       (value-of-cond (cdr pairs) env))))
 
