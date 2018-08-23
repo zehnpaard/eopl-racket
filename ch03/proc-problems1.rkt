@@ -18,3 +18,9 @@
         (value-of body (extend-env var proc1 ev))))
   ))
 
+;3.20
+(proc-exp 'x
+ (proc-exp 'y
+   (diff-exp (var-exp 'x)
+             (diff-exp (const-exp 0)
+                       (var-exp 'y)))))
