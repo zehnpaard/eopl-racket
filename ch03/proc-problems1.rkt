@@ -321,3 +321,25 @@
             (newline)
             res))))
   ))
+
+;3.28
+
+(define (value-of exp env)
+  (cases expression exp
+    (proc-exp (var body)
+      (proc-val (procedure var body)))
+    (call-exp (rator rand)
+      (apply-procedure
+       (expval->proc (value-of rator env))
+       (value-of rand env)
+       env))))
+
+(define-datatype proc proc?
+  (procedure
+   (var identifier?)
+   (body expression?)))
+
+(define (apply-procedure proc1 val env)
+  (cases proc proc1
+    (procedure (var body)
+      (value-of body (extend-env var val env)))))
