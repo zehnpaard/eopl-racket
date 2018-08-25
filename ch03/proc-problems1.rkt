@@ -195,3 +195,151 @@
       (call-exp (var-exp 'm) (var-exp 'm))
       (zero?-exp (const-exp 1)))
      (zero?-exp (const-exp 0)))))
+
+;3.25
+(define y
+  (proc-exp 'f
+    (let-exp 'd
+      (proc-exp 'x
+        (proc-exp 'z
+          (call-exp
+            (call-exp
+              (var-exp 'f)
+              (call-exp
+                (var-exp 'x)
+                (var-exp 'x)))
+            (var-exp 'z))))
+      (proc-exp 'n
+        (call-exp
+          (call-exp
+            (var-exp 'f)
+            (call-exp
+              (var-exp 'd)
+              (var-exp 'd)))
+          (var-exp 'n))))))
+
+(define maketimes
+  (proc-exp 'f
+    (proc-exp 'x
+      (if-exp (zero?-exp (var-exp 'x))
+        (const-exp 0)
+        (diff-exp
+         (call-exp
+          (var-exp 'f)
+          (diff-exp (var-exp 'x)
+                    (const-exp 1)))
+         (const-exp -4))))))
+
+(value-of-program (a-program (call-exp (call-exp y maketimes) (const-exp 3))))
+
+;3.26
+
+(define (remove-var var vars)
+  (cond
+    ((null? vars)
+     vars)
+    ((eqv? var (car vars))
+     (remove-var var (cdr vars)))
+    (else
+     (cons (car vars)
+           (remove-var var (cdr vars))))))
+
+(define (free-vars exp1)
+  (cases expression exp1
+    (var-exp (var)
+      (list var))
+    (const-exp (num)
+      '())
+    (diff-exp (exp1 exp2)
+      (append (free-vars exp1)
+              (free-vars exp2)))
+    (zero?-exp (exp1)
+      (free-vars exp1))
+    (if-exp (exp1 exp2 exp3)
+      (append (free-vars exp1)
+              (free-vars exp2)
+              (free-vars exp3)))
+    (call-exp (rator rand)
+      (append (free-vars rator)
+              (free-vars rand)))
+    (let-exp (var exp1 body)
+      (append (free-vars exp1)
+              (remove-var
+                var
+                (free-vars body))))
+    (proc-exp (var body)
+      (remove-var
+        var
+        (free-vars body)))
+  ))
+
+(define (create-proc-env var body env)
+  (let ((vars (remove-var var (free-vars body))))
+    (extend-env* vars (map (lambda (v) (apply-env env v)) vars) (empty-env))))
+
+(define (value-of exp env)
+  (cases expression exp
+    (proc-exp (var body)
+      (proc-val (procedure var body (create-proc-env var body env))))
+    ))
+
+;3.27
+
+(define-datatype expression expression?
+  (traceproc-exp
+    (var identifier?)
+    (body expression?))
+  )
+
+(define (value-of exp env)
+  (cases expression exp
+    (traceproc-exp (var body)
+      (proc-val (trace-procedure var body (create-proc-env var body env))))
+    ))
+
+(define-datatype proc proc?
+  (procedure
+   (var identifier?)
+   (body expression?)
+   (env environment?))
+  (trace-procedure
+   (var identifier?)
+   (body expression?)
+   (env environment?)))
+
+(define (apply-procedure proc1 val)
+  (cases proc proc1
+    (procedure (var body env)
+      (value-of body (extend-env var val env)))
+    (trace-procedure (var body env)
+      (begin
+        (write "enter")
+        (newline)
+        (let ((res (value-of body (extend-env var val env))))
+          (begin
+            (write "exit")
+            (newline)
+            res))))
+  ))
+
+;3.28
+
+(define (value-of exp env)
+  (cases expression exp
+    (proc-exp (var body)
+      (proc-val (procedure var body)))
+    (call-exp (rator rand)
+      (apply-procedure
+       (expval->proc (value-of rator env))
+       (value-of rand env)
+       env))))
+
+(define-datatype proc proc?
+  (procedure
+   (var identifier?)
+   (body expression?)))
+
+(define (apply-procedure proc1 val env)
+  (cases proc proc1
+    (procedure (var body)
+      (value-of body (extend-env var val env)))))
