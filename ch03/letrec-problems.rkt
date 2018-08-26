@@ -37,3 +37,49 @@
   (cases proc proc1
     (procedure (vars body env)
       (value-of body (extend-env* vars vals env)))))
+
+;3.32
+
+(define (extend-env-rec rec-procs env)
+  (list rec-procs env))
+
+(define (apply-env env var)
+  (cond
+   ((null? env)
+    (eopl:error 'apply-env "Var ~s not found in env" var))
+   ((list? (car (car env)))
+    (apply-env-recs env var (car env)))
+   ((eqv? var (car (car env)))
+    (cadr (car env)))
+   (else
+    (apply-env (cadr env) var))))
+
+(define (apply-env-recs env var rec-procs)
+  (cond
+    ((null? rec-procs)
+     (apply-env (cadr env) var))
+    ((eqv? var (car (car rec-procs)))
+     (proc-val (procedure (cadr (car rec-procs)) (caddr (car rec-procs)) env)))
+    (else
+     (apply-env-recs env var (cdr rec-procs)))))
+
+;Expression
+(define-datatype expression expression?
+  (letrec-exp
+   (rec-procs (list-of rec-proc?))
+   (let-body expression?))
+  )
+
+(define (rec-proc? x)
+  (and
+   (list? x)
+   (= 3 (length x))
+   (identifier? (car x))
+   (identifier? (cadr x))
+   (expression? (caddr x))))
+
+(define (value-of exp env)
+  (cases expression exp
+    (letrec-exp (rec-procs let-body)
+       (value-of let-body (extend-env-rec rec-procs env)))
+  ))
