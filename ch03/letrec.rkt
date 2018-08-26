@@ -103,7 +103,7 @@
     (rand expression?))
   (letrec-exp
    (proc-name identifier?)
-   (arg expression?)
+   (arg identifier?)
    (proc-body expression?)
    (let-body expression?))
   )
