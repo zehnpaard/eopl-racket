@@ -192,3 +192,20 @@
       (cadr (car env))))
    (else
     (apply-env (cadr env) var))))
+
+;3.36
+(define (extend-env-recs rec-procs env)
+  (if (null? rec-procs)
+    env
+    (let ((vec (make-vector 1)))
+      (let ((new-env (extend-env-recs
+                      (cdr rec-procs)
+                      (extend-env (car (car rec-procs))
+                                  vec
+                                  env))))
+        (vector-set! vec 0
+          (proc-val
+           (procedure (cadr (car rec-procs))
+                      (caddr (car rec-procs))
+                      new-env)))
+        new-env)))
