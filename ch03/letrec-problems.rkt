@@ -152,3 +152,60 @@
   (cases proc proc1
     (procedure (vars body env)
       (value-of body (extend-env* vars vals env)))))
+
+;3.34
+(define (empty-env)
+  (lambda (var)
+    (eopl:error 'empty-env "Variable ~s not found" var)))
+
+(define (extend-env var val env)
+  (lambda (search-var)
+    (if (eqv? search-var var)
+      val
+      (apply-env env search-var))))
+
+(define (apply-env env var)
+  (env var))
+
+(define (extend-env-rec proc-name arg body)
+  (lambda (search-var)
+    (if (eqv? search-var proc-name)
+      (proc-val (procedure arg body (extend-env-rec proc-name arg body)))
+      (apply-env env search-var))))
+
+;3.35
+(define (extend-env-rec proc-name arg body env)
+  (let ((vec (make-vector 1)))
+    (let ((new-env (extend-env proc-name vec env)))
+      (vector-set! vec 0
+        (proc-val (procedure arg body new-env)))
+      new-env)))
+
+
+(define (apply-env env var)
+  (cond
+   ((null? env)
+    (eopl:error 'apply-env "Var ~s not found in env" var))
+   ((eqv? var (car (car env)))
+    (if (vector? (cadr (car env)))
+      (vector-ref (cadr (car env)) 0)
+      (cadr (car env))))
+   (else
+    (apply-env (cadr env) var))))
+
+;3.36
+(define (extend-env-recs rec-procs env)
+  (if (null? rec-procs)
+    env
+    (let ((vec (make-vector 1)))
+      (let ((new-env (extend-env-recs
+                      (cdr rec-procs)
+                      (extend-env (car (car rec-procs))
+                                  vec
+                                  env))))
+        (vector-set! vec 0
+          (proc-val
+           (procedure (cadr (car rec-procs))
+                      (caddr (car rec-procs))
+                      new-env)))
+        new-env)))
