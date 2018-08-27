@@ -172,3 +172,23 @@
     (if (eqv? search-var proc-name)
       (proc-val (procedure arg body (extend-env-rec proc-name arg body)))
       (apply-env env search-var))))
+
+;3.35
+(define (extend-env-rec proc-name arg body env)
+  (let ((vec (make-vector 1)))
+    (let ((new-env (extend-env proc-name vec env)))
+      (vector-set! vec 0
+        (proc-val (procedure arg body new-env)))
+      new-env)))
+
+
+(define (apply-env env var)
+  (cond
+   ((null? env)
+    (eopl:error 'apply-env "Var ~s not found in env" var))
+   ((eqv? var (car (car env)))
+    (if (vector? (cadr (car env)))
+      (vector-ref (cadr (car env)) 0)
+      (cadr (car env))))
+   (else
+    (apply-env (cadr env) var))))
