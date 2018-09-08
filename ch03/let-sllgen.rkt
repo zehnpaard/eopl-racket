@@ -31,3 +31,21 @@
 
 (sllgen:make-define-datatypes scanner-spec1 let-grammar)
 (define scan-parse (sllgen:make-string-parser scanner-spec1 let-grammar))
+
+(define-datatype expval expval?
+  (num-val
+   (num number?))
+  (bool-val
+   (bool boolean?)))
+
+(define expval->num
+  (lambda (v)
+    (cases expval v
+      (num-val (n) n)
+      (else (eopl:error 'expval->num "Cannot convert non-num-val ~s to number" v)))))
+
+(define expval->bool
+  (lambda (v)
+    (cases expval v
+      (bool-val (b) b)
+      (else (eopl:error 'expval->bool "Cannot convert non-bool-val ~s to boolean" v)))))
