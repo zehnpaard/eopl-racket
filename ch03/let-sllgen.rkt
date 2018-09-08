@@ -73,3 +73,32 @@
       (if (eq? v v1)
         val
         (apply-env e1 v)))))
+
+
+; interpreter
+
+(define (run s)
+  (value-of-program (scan-parse s)))
+
+(define (value-of-program p)
+  (cases program p
+    (a-program (exp1)
+      (value-of exp1 (empty-env)))))
+
+(define (value-of exp1 env1)
+  (cases expression exp1
+    (const-exp (n)
+      (num-val n))
+    (var-exp (v)
+      (apply-env env1 v))
+    (zero?-exp (e)
+       (bool-val (zero? (expval->bool (value-of e env1)))))
+    (diff-exp (e1 e2)
+       (num-val (- (expval->num (value-of e1 env1))
+                   (expval->num (value-of e2 env1)))))
+    (if-exp (cond-exp true-exp false-exp)
+      (if (expval->bool (value-of cond-exp env1))
+        (value-of true-exp env1)
+        (value-of false-exp env1)))
+    (let-exp (v e1 e2)
+      (value-of e2 (extend-env v e1 env1)))))
