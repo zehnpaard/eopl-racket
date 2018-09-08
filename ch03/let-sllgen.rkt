@@ -7,7 +7,10 @@
     (number (digit (arbno digit)) number)))
 
 (define let-grammar
-  '((expression
+  '((program
+     (expression)
+     a-program)
+    (expression
      (number)
      const-exp)
     (expression
