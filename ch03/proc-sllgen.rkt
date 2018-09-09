@@ -36,3 +36,8 @@
     (expression
      ("(" expression "," expression ")")
      call-exp)))
+
+; SLLGEN
+(sllgen:make-define-datatypes scanner-spec1 proc-grammar)
+(define scan-parse (sllgen:make-string-parser scanner-spec1 proc-grammar))
+
