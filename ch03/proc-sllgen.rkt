@@ -46,7 +46,9 @@
   (num-val
    (num number?))
   (bool-val
-   (bool boolean?)))
+   (bool boolean?))
+  (proc-val
+   (proc proc?)))
 
 (define expval->num
   (lambda (v)
@@ -59,6 +61,12 @@
     (cases expval v
       (bool-val (b) b)
       (else (eopl:error 'expval->bool "Cannot convert non-bool-val ~s to boolean" v)))))
+
+(define expval->proc
+  (lambda (v)
+    (cases expval v
+      (proc-val (p) p)
+      (else (eopl:error 'expval->proc "Cannot convert non-proc-val ~s to proc" v)))))
 
 ; environment constructors and accessors
 
@@ -91,4 +99,3 @@
   (cases proc proc1
     (procedure (var body penv)
        (value-of body (extend-env var val penv)))))
-
