@@ -1,6 +1,6 @@
 #lang eopl
 
-; Token scanner specification
+;Token scanner specification
 (define scanner-spec1
   '((white-sp (whitespace) skip)
     (comment ("%" (arbno (not #\newline))) skip)
@@ -8,7 +8,7 @@
     (number (digit (arbno digit)) number)))
 
 ; Grammar specification
-(define let-grammar
+(define proc-grammar
   '((program
      (expression)
      a-program)
@@ -16,31 +16,39 @@
      (number)
      const-exp)
     (expression
-     ("-" "(" expression "," expression ")")
-     diff-exp)
+     (identifier)
+     var-exp)
     (expression
      ("zero? (" expression ")")
      zero?-exp)
     (expression
+     ("- (" expression "," expression ")")
+     diff-exp)
+    (expression
      ("if" expression "then" expression "else" expression)
      if-exp)
     (expression
-     (identifier)
-     var-exp)
-    (expression
      ("let" identifier "=" expression "in" expression)
-     let-exp)))
+     let-exp)
+    (expression
+     ("proc (" identifier ")" expression)
+     proc-exp)
+    (expression
+     ("(" expression "," expression ")")
+     call-exp)))
 
 ; SLLGEN
-(sllgen:make-define-datatypes scanner-spec1 let-grammar)
-(define scan-parse (sllgen:make-string-parser scanner-spec1 let-grammar))
+(sllgen:make-define-datatypes scanner-spec1 proc-grammar)
+(define scan-parse (sllgen:make-string-parser scanner-spec1 proc-grammar))
 
 ; expval constructors and accessors
 (define-datatype expval expval?
   (num-val
    (num number?))
   (bool-val
-   (bool boolean?)))
+   (bool boolean?))
+  (proc-val
+   (proc proc?)))
 
 (define expval->num
   (lambda (v)
@@ -53,6 +61,12 @@
     (cases expval v
       (bool-val (b) b)
       (else (eopl:error 'expval->bool "Cannot convert non-bool-val ~s to boolean" v)))))
+
+(define expval->proc
+  (lambda (v)
+    (cases expval v
+      (proc-val (p) p)
+      (else (eopl:error 'expval->proc "Cannot convert non-proc-val ~s to proc" v)))))
 
 ; environment constructors and accessors
 
@@ -74,31 +88,48 @@
         val
         (apply-env e1 v)))))
 
+; procedure datatype
+(define-datatype proc proc?
+  (procedure
+   (var identifier?)
+   (body expression?)
+   (penv environment?)))
 
-; interpreter
+(define (apply-procedure proc1 val)
+  (cases proc proc1
+    (procedure (var body penv)
+       (value-of body (extend-env var val penv)))))
+
+; Interpreter
 
 (define (run s)
   (value-of-program (scan-parse s)))
 
 (define (value-of-program p)
   (cases program p
-    (a-program (exp1)
-      (value-of exp1 (empty-env)))))
+    (a-program (e)
+      (value-of e (empty-env)))))
 
-(define (value-of exp1 env1)
-  (cases expression exp1
+(define (value-of e env1)
+  (cases expression e
     (const-exp (n)
       (num-val n))
     (var-exp (v)
       (apply-env env1 v))
     (zero?-exp (e)
-       (bool-val (zero? (expval->num (value-of e env1)))))
+      (bool-val (zero? (expval->num (value-of e env1)))))
     (diff-exp (e1 e2)
-       (num-val (- (expval->num (value-of e1 env1))
-                   (expval->num (value-of e2 env1)))))
-    (if-exp (cond-exp true-exp false-exp)
-      (if (expval->bool (value-of cond-exp env1))
-        (value-of true-exp env1)
-        (value-of false-exp env1)))
+      (num-val (- (expval->num (value-of e1 env1))
+                  (expval->num (value-of e2 env1)))))
+    (if-exp (cond-e true-e false-e)
+      (if (expval->bool (value-of cond-e env1))
+        (value-of true-e env1)
+        (value-of false-e env1)))
     (let-exp (v e1 e2)
-      (value-of e2 (extend-env v (value-of e1 env1) env1)))))
+      (value-of e2 (extend-env v (value-of e1 env1) env1)))
+    (proc-exp (v e1)
+      (proc-val (procedure v e1 env1)))
+    (call-exp (e1 e2)
+      (apply-procedure
+       (expval->proc (value-of e1 env1))
+       (value-of e2 env1)))))
