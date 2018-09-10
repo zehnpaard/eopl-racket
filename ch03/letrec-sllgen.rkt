@@ -39,3 +39,7 @@
     (expression
      ("letrec" identifier "(" identifier ") =" expression "in" expression)
      letrec-exp)))
+
+; SLLGEN
+(sllgen:make-define-datatypes scanner-spec letrec-grammar)
+(define scan-parse (sllgen:make-string-parser scanner-spec letrec-grammar))
