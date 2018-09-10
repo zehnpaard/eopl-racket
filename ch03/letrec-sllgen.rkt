@@ -95,4 +95,39 @@
 (define (apply-procedure proc1 val1)
   (cases proc proc1
     (procedure (var body penv)
-      (value-of body (extend-env var val penv)))))
+      (value-of body (extend-env var val1 penv)))))
+
+; interpreter
+(define (run s)
+  (value-of-program (scan-parse s)))
+
+(define (value-of-program p)
+  (cases program p
+    (a-program (e)
+      (value-of e (empty-env)))))
+
+(define (value-of exp1 env1)
+  (cases expression exp1
+    (const-exp (n)
+      (num-val n))
+    (var-exp (v)
+      (apply-env env1 v))
+    (zero?-exp (e)
+      (bool-val (zero? (expval->num (value-of e env1)))))
+    (diff-exp (e1 e2)
+      (num-val (- (expval->num (value-of e1 env1))
+                  (expval->num (value-of e2 env1)))))
+    (if-exp (cond-e true-e false-e)
+      (if (expval->bool (value-of cond-e env1))
+        (value-of true-e env1)
+        (value-of false-e env1)))
+    (let-exp (v1 e1 e2)
+      (value-of e2 (extend-env v1 (value-of e1 env1) env1)))
+    (proc-exp (v1 e1)
+      (proc-val (procedure v1 e1 env1)))
+    (call-exp (e1 e2)
+      (apply-procedure
+        (expval->proc (value-of e1 env1))
+        (value-of e2 env1)))
+    (letrec-exp (v a b e1)
+      '())))
