@@ -74,6 +74,11 @@
   (extend-env
    (var identifier?)
    (val expval?)
+   (env environment?))
+  (extend-env-rec
+   (var identifier?)
+   (arg identifier?)
+   (body expression?)
    (env environment?)))
 
 (define (apply-env e v)
@@ -83,6 +88,10 @@
     (extend-env (var1 val1 env1)
       (if (eq? var1 v)
         val1
+        (apply-env env1 v)))
+    (extend-env-rec (var1 arg1 body1 env1)
+      (if (eq? var1 v)
+        (proc-val (procedure arg1 body1 e))
         (apply-env env1 v)))))
 
 ; procedure datatype
