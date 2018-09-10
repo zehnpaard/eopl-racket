@@ -78,3 +78,15 @@
       (if (eq? var1 v)
         val1
         (apply-env env1 v)))))
+
+; procedure datatype
+(define-datatype proc proc?
+  (procedure
+   (var identifier?)
+   (body expression?)
+   (penv environment?)))
+
+(define (apply-procedure proc1 val1)
+  (cases proc proc1
+    (procedure (var body penv)
+      (value-of body (extend-env var val penv)))))
