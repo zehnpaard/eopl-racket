@@ -49,7 +49,9 @@
   (num-val
    (num number?))
   (bool-val
-   (bool boolean?)))
+   (bool boolean?))
+  (proc-val
+   (proc proc?)))
 
 (define (expval->num v)
   (cases expval v
@@ -59,6 +61,10 @@
   (cases expval v
     (bool-val (b) b)
     (else (eopl:error 'expval->bool "Cannot convert ~s to boolean" v))))
+(define (expval->proc v)
+  (cases expval v
+    (proc-val (p) p)
+    (else (eopl:error 'expval->proc "Cannot convert ~s to procedure" v))))
 
 ; environment
 (define identifier? symbol?)
