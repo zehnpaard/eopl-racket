@@ -139,4 +139,4 @@
         (expval->proc (value-of e1 env1))
         (value-of e2 env1)))
     (letrec-exp (v a b e1)
-      '())))
+      (value-of e1 (extend-env-rec v a b env1)))))
