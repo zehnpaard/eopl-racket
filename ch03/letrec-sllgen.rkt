@@ -59,3 +59,22 @@
   (cases expval v
     (bool-val (b) b)
     (else (eopl:error 'expval->bool "Cannot convert ~s to boolean" v))))
+
+; environment
+(define identifier? symbol?)
+
+(define-datatype environment environment?
+  (empty-env)
+  (extend-env
+   (var identifier?)
+   (val expval?)
+   (env environment?)))
+
+(define (apply-env e v)
+  (cases environment e
+    (empty-env ()
+      (eopl:error 'apply-env "Variable ~s not found in environment" v))
+    (extend-env (var1 val1 env1)
+      (if (eq? var1 v)
+        val1
+        (apply-env env1 v)))))
