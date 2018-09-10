@@ -43,3 +43,19 @@
 ; SLLGEN
 (sllgen:make-define-datatypes scanner-spec letrec-grammar)
 (define scan-parse (sllgen:make-string-parser scanner-spec letrec-grammar))
+
+; expval constructors and accessors
+(define-datatype expval expval?
+  (num-val
+   (num number?))
+  (bool-val
+   (bool boolean?)))
+
+(define (expval->num v)
+  (cases expval v
+    (num-val (n) n)
+    (else (eopl:error 'expval->num "Cannot convert ~s to number" v))))
+(define (expval->bool v)
+  (cases expval v
+    (bool-val (b) b)
+    (else (eopl:error 'expval->bool "Cannot convert ~s to boolean" v))))
