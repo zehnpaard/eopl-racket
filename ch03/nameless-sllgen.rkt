@@ -64,3 +64,38 @@
 ; SLLGEN
 (sllgen:make-define-datatypes scanner-spec nameless-grammar)
 (define scan-parse (sllgen:make-string-parser scanner-spec nameless-grammar))
+
+; Translation
+(define (translation-of-program p)
+  (cases program p
+    (a-program (e)
+      (a-program
+       (translation-of e (empty-senv))))))
+
+(define (translation-of e senv1)
+  (cases expression e
+    (const-exp (num)
+      (const-exp num))
+    (zero?-exp (exp1)
+      (zero?-exp (translation-of exp1 senv1)))
+    (diff-exp (exp1 exp2)
+      (diff-exp (translation-of exp1 senv1)
+                (translation-of exp2 senv1)))
+    (if-exp (cond-exp true-exp false-exp)
+      (if-exp (translation-of if-exp senv1)
+              (translation-of true-exp senv1)
+              (translation-of false-exp senv1)))
+    (var-exp (var)
+      (nameless-var-exp (apply-senv senv1 var)))
+    (let-exp (var exp1 body)
+      (nameless-let-exp
+       (translation-of exp1 senv1)
+       (translation-of body (extend-senv var senv1))))
+    (proc-exp (arg body)
+      (nameless-proc-exp
+       (translation-of body (extend-senv arg senv1))))
+    (call-exp (func arg)
+       (call-exp (translation-of func senv1)
+                 (translation-of arg senv1)))
+    (else
+     (eopl:error 'translation-of "Unable to translate expression ~s" e))))
