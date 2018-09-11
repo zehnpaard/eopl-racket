@@ -60,3 +60,7 @@
      0)
     (else
      (+ 1 (apply-senv (cdr senv) var)))))
+
+; SLLGEN
+(sllgen:make-define-datatypes scanner-spec nameless-grammar)
+(define scan-parse (sllgen:make-string-parser scanner-spec nameless-grammar))
