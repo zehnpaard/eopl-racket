@@ -43,7 +43,8 @@
      ("%let" expression "in" expression)
      nameless-let-exp)
     (expression
-     "%lexproc" expression)))
+     ("%lexproc" expression)
+     nameless-proc-exp)))
 
 ; Static environment
 (define (empty-senv) '())
