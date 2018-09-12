@@ -147,3 +147,31 @@
   (cases proc proc1
     (procedure (body penv)
       (value-of body (extend-nameless-env arg penv)))))
+
+; interpreter
+
+(define (value-of e env1)
+  (cases expression e
+    (const-exp (n)
+      (num-val n))
+    (zero?-exp (exp1)
+      (bool-val (zero? (expval->num (value-of exp1 env1)))))
+    (diff-exp (exp1 exp2)
+      (num-val (- (expval->num (value-of exp1 env1))
+                  (expval->num (value-of exp2 env1)))))
+    (if-exp (cond-exp true-exp false-exp)
+      (if (expval->bool (value-of cond-exp env1))
+        (value-of true-exp env1)
+        (value-of false-exp env1)))
+    (call-exp (func arg)
+      (apply-procedure
+       (expval->proc (value-of func env1))
+       (value-of arg env1)))
+    (nameless-var-exp (n)
+      '())
+    (nameless-let-exp (exp1 body)
+      '())
+    (nameless-proc-exp (body)
+      '())
+    (else
+      (eopl:error 'value-of "Cannot get value of expression ~s" e))))
