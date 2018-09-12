@@ -176,3 +176,12 @@
       (proc-val (procedure body env1)))
     (else
       (eopl:error 'value-of "Cannot get value of expression ~s" e))))
+
+(define (value-of-program p)
+  (cases program p
+    (a-program (e)
+      (value-of e (empty-nameless-env)))))
+
+(define (run s)
+  (value-of-program
+   (translation-of-program (scan-parse s))))
