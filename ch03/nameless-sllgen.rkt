@@ -105,7 +105,9 @@
   (num-val
    (num number?))
   (bool-val
-   (bool boolean?)))
+   (bool boolean?))
+  (proc-val
+   (proc proc?)))
 
 (define (expval->num v)
   (cases expval v
@@ -116,6 +118,11 @@
   (cases expval v
     (bool-val (b) b)
     (else (eopl:error 'expval->bool "Cannot convert ~s to boolean" v))))
+
+(define (expval->proc v)
+  (cases expval v
+    (proc-val (p) p)
+    (else (eopl:error 'expval->proc "Cannot convert ~s to proc" v))))
 
 ; nameless environment
 (define (nameless-environment? x)
@@ -129,3 +136,14 @@
 
 (define (apply-nameless-env nenv n)
   (list-ref nenv n))
+
+; procedure
+(define-datatype proc proc?
+  (procedure
+   (body expression?)
+   (penv nameless-environment?)))
+
+(define (apply-procedure proc1 arg)
+  (cases proc proc1
+    (procedure (body penv)
+      (value-of body (extend-nameless-env val penv)))))
