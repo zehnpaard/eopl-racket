@@ -146,4 +146,4 @@
 (define (apply-procedure proc1 arg)
   (cases proc proc1
     (procedure (body penv)
-      (value-of body (extend-nameless-env val penv)))))
+      (value-of body (extend-nameless-env arg penv)))))
