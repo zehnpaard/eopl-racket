@@ -116,3 +116,16 @@
   (cases expval v
     (bool-val (b) b)
     (else (eopl:error 'expval->bool "Cannot convert ~s to boolean" v))))
+
+; nameless environment
+(define (nameless-environment? x)
+  ((list-of expval?) x))
+
+(define (empty-nameless-env)
+  '())
+
+(define (extend-nameless-env val nenv)
+  (cons val nenv))
+
+(define (apply-nameless-env nenv n)
+  (list-ref nenv n))
