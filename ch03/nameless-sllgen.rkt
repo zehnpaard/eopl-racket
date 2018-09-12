@@ -168,10 +168,11 @@
        (expval->proc (value-of func env1))
        (value-of arg env1)))
     (nameless-var-exp (n)
-      '())
+      (apply-nameless-env env1 n))
     (nameless-let-exp (exp1 body)
-      '())
+      (value-of body
+        (extend-nameless-env (value-of exp1 env1) env1)))
     (nameless-proc-exp (body)
-      '())
+      (proc-val (procedure body env1)))
     (else
       (eopl:error 'value-of "Cannot get value of expression ~s" e))))
