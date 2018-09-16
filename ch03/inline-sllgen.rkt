@@ -65,6 +65,26 @@
     (else
      (+ 1 (apply-senv (cdr senv) var)))))
 
+; misc
+(define identifier? symbol?)
+
+; const-exp environment
+(define-datatype const-exps const-exps?
+  (empty-const-exps)
+  (extend-const-exps
+   (var identifier?)
+   (val expression?)
+   (env const-exps?)))
+
+(define (apply-const-exps ces v)
+  (cases const-exps ces
+    (empty-const-exps ()
+      '())
+    (extend-const-exps (var1 val1 env1)
+      (if (eq? v var1)
+        val1
+        (apply-const-exps env1 v)))))
+
 ; Translation
 (define (translation-of-program p)
   (cases program p
