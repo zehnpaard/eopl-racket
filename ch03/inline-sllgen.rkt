@@ -46,6 +46,10 @@
      ("%lexproc" expression)
      nameless-proc-exp)))
 
+; SLLGEN
+(sllgen:make-define-datatypes scanner-spec inline-grammar)
+(define scan-parse (sllgen:make-string-parser scanner-spec inline-grammar))
+
 ; Static environment
 (define (empty-senv) '())
 
@@ -60,10 +64,6 @@
      0)
     (else
      (+ 1 (apply-senv (cdr senv) var)))))
-
-; SLLGEN
-(sllgen:make-define-datatypes scanner-spec inline-grammar)
-(define scan-parse (sllgen:make-string-parser scanner-spec inline-grammar))
 
 ; Translation
 (define (translation-of-program p)
