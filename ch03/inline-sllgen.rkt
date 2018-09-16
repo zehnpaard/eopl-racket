@@ -89,7 +89,8 @@
 (define-datatype known-procs known-procs?
   (empty-known-procs)
   (extend-known-procs
-   (var identifier?)
+   (fname identifier?)
+   (arg identifier?)
    (body expression?)
    (env known-procs?)))
 
@@ -97,13 +98,13 @@
   (cases known-procs kps
     (empty-known-procs ()
       '())
-    (extend-known-procs (var1 exp1 env1)
-      (if (eq? v var1)
-        exp1
+    (extend-known-procs (fname1 arg1 body1 env1)
+      (if (eq? v fname1)
+        (list arg1 body1)
         (apply-known-procs env1 v)))))
 
 ; Generate known-proc
-(define (make-known-proc arg body ces)
+(define (make-known-proc-body arg body ces)
   '())
 
 ; Translation
@@ -140,14 +141,14 @@
                                 (extend-const-exps var exp1 ces1)
                                 kps1)))
         (proc-exp (arg body)
-          (let ((known-proc (make-known-proc arg body ces1)))
+          (let ((known-proc (make-known-proc-body arg body ces1)))
             (nameless-let-exp
              (translation-of exp1 senv1 ces1 kps1)
              (translation-of body (extend-senv var senv1)
                                   ces1
                                   (if (null? known-proc)
                                     kps1
-                                    (extend-known-procs var known-proc kps1))))))
+                                    (extend-known-procs var arg known-proc kps1))))))
         (else
           (nameless-let-exp
            (translation-of exp1 senv1 ces1 kps1)
@@ -155,7 +156,19 @@
     (proc-exp (arg body)
       (nameless-proc-exp (translation-of body (extend-senv arg senv1) ces1 kps1)))
     (call-exp (func arg)
-      (call-exp (translation-of func senv1 ces1 kps1)
-                (translation-of arg senv1 ces1 kps1)))
+      (cases expression func
+        (var-exp (fname)
+          (let ((known-proc (apply-known-procs fname kps1)))
+            (if (null? known-proc)
+              (call-exp (translation-of func senv1 ces1 kps1)
+                        (translation-of arg senv1 ces1 kps1))
+              (translation-of
+               (let-exp (car known-proc)
+                        arg
+                        (cadr known-proc))
+               senv1 ces1 kps1))))
+        (else
+          (call-exp (translation-of func senv1 ces1 kps1)
+                    (translation-of arg senv1 ces1 kps1)))))
     (else
      (eopl:error 'translation-of "Unable to translate ~s" e))))
