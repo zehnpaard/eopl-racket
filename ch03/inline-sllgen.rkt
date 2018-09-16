@@ -107,6 +107,34 @@
 (define (make-known-proc-body arg body ces)
   '())
 
+(define (get-free-variables e bound-vars)
+  (cases expression e
+    (const-exp (num)
+      '())
+    (zero?-exp (exp1)
+      (get-free-variables exp1 bound-vars))
+    (diff-exp (exp1 exp2)
+      (append (get-free-variables exp1 bound-vars)
+              (get-free-variables exp2 bound-vars)))
+    (if-exp (cond-exp true-exp false-exp)
+      (append (get-free-variables cond-exp bound-vars)
+              (get-free-variables true-exp bound-vars)
+              (get-free-variables false-exp bound-vars)))
+    (var-exp (var)
+      (if (member var bound-vars)
+        '()
+        (list var)))
+    (let-exp (var exp1 body)
+      (append (get-free-variables exp1 bound-vars)
+              (get-free-variables body (cons var bound-vars))))
+    (proc-exp (arg body)
+      (get-free-variables body (cons arg bound-vars)))
+    (call-exp (func arg)
+      (append (get-free-variables func bound-vars)
+              (get-free-variables arg bound-vars)))
+    (else
+      (eopl:error 'get-free-variables "Cannot get free variables of expression ~s" e))))
+
 ; Translation
 (define (translation-of-program p)
   (cases program p
