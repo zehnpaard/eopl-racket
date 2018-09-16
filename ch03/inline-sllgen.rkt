@@ -45,3 +45,18 @@
     (expression
      ("%lexproc" expression)
      nameless-proc-exp)))
+
+; Static environment
+(define (empty-senv) '())
+
+(define (extend-senv var senv)
+  (cons var senv))
+
+(define (apply-senv senv var)
+  (cond
+    ((null? senv)
+     (eopl:error 'apply-senv "Variable ~s not found" var))
+    ((eqv? var (car senv))
+     0)
+    (else
+     (+ 1 (apply-senv (cdr senv) var)))))
