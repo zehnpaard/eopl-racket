@@ -102,6 +102,10 @@
         exp1
         (apply-known-procs env1 v)))))
 
+; Generate known-proc
+(define (make-known-proc arg body ces)
+  '())
+
 ; Translation
 (define (translation-of-program p)
   (cases program p
@@ -135,6 +139,15 @@
            (translation-of body (extend-senv var senv1)
                                 (extend-const-exps var exp1 ces1)
                                 kps1)))
+        (proc-exp (arg body)
+          (let ((known-proc (make-known-proc arg body ces1)))
+            (nameless-let-exp
+             (translation-of exp1 senv1 ces1 kps1)
+             (translation-of body (extend-senv var senv1)
+                                  ces1
+                                  (if (null? known-proc)
+                                    kps1
+                                    (extend-known-procs var known-proc kps1))))))
         (else
           (nameless-let-exp
            (translation-of exp1 senv1 ces1 kps1)
