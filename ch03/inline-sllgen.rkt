@@ -101,3 +101,48 @@
       (if (eq? v var1)
         exp1
         (apply-known-procs env1 v)))))
+
+; Translation
+(define (translation-of-program p)
+  (cases program p
+    (a-program (e)
+      (a-program
+       (translation-of e
+                       (empty-senv)
+                       (empty-const-exps)
+                       (empty-known-procs))))))
+
+(define (translation-of e senv1 ces1 kps1)
+  (cases expression e
+    (const-exp (num)
+      (const-exp num))
+    (zero?-exp (exp1)
+      (zero?-exp (translation-of exp1 senv1 ces1 kps1)))
+    (diff-exp (exp1 exp2)
+      (diff-exp (translation-of exp1 senv1 ces1 kps1)
+                (translation-of exp2 senv1 ces1 kps1)))
+    (if-exp (cond-exp true-exp false-exp)
+      (if-exp (translation-of cond-exp senv1 ces1 kps1)
+              (translation-of true-exp senv1 ces1 kps1)
+              (translation-of false-exp senv1 ces1 kps1)))
+    (var-exp (var)
+      (nameless-var-exp (apply-senv senv1 var)))
+    (let-exp (var exp1 body)
+      (cases expression exp1
+        (const-exp (num)
+          (nameless-let-exp
+           exp1
+           (translation-of body (extend-senv var senv1)
+                                (extend-const-exps var exp1 ces1)
+                                kps1)))
+        (else
+          (nameless-let-exp
+           (translation-of exp1 senv1 ces1 kps1)
+           (translation-of body (extend-senv var senv1) ces1 kps1)))))
+    (proc-exp (arg body)
+      (nameless-proc-exp (translation-of body (extend-senv arg senv1) ces1 kps1)))
+    (call-exp (func arg)
+      (call-exp (translation-of func senv1 ces1 kps1)
+                (translation-of arg senv1 ces1 kps1)))
+    (else
+     (eopl:error 'translation-of "Unable to translate ~s" e))))
