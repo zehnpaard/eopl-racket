@@ -115,7 +115,7 @@
           (nameless-let-exp
            exp1
            (translation-of body (extend-senv var senv1)
-                                (extend-const-exps exp1 ces1))))
+                                (extend-const-exps var exp1 ces1))))
         (else
           (nameless-let-exp
            (translation-of exp1 senv1 ces1)
