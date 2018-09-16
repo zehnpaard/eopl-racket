@@ -67,6 +67,11 @@
 
 ; misc
 (define identifier? symbol?)
+(define (any? pred xs)
+  (if (null? xs)
+    #f
+    (or (pred (car xs))
+        (any? pred (cdr xs)))))
 
 ; const-exp environment
 (define-datatype const-exps const-exps?
@@ -105,7 +110,21 @@
 
 ; Generate known-proc
 (define (make-known-proc-body arg body ces)
-  '())
+  (let ((free-vars (get-free-variables body (list arg))))
+    (let ((const-exps (map (lambda (v) (apply-const-exps v ces))
+                           free-vars)))
+      (if (any? null? const-exps)
+        '()
+        (let-bind-all free-vars const-exps body)))))
+
+(define (let-bind-all free-vars const-exps body)
+  (if (null? free-vars)
+    body
+    (let-bind-all (cdr free-vars)
+                  (cdr const-exps)
+                  (let-exp (car free-vars)
+                           (car const-exps)
+                           body))))
 
 (define (get-free-variables e bound-vars)
   (cases expression e
