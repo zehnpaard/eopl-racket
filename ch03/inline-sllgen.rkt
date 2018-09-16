@@ -34,7 +34,7 @@
      ("proc (" identifier ")" expression)
      proc-exp)
     (expression
-     ("(" expression "," expression ")")
+     ("(" expression expression ")")
      call-exp)
     (expression
      ("%lexref" number)
@@ -111,19 +111,19 @@
 ; Generate known-proc
 (define (make-known-proc-body arg body ces)
   (let ((free-vars (get-free-variables body (list arg))))
-    (let ((const-exps (map (lambda (v) (apply-const-exps v ces))
+    (let ((const-exps-list (map (lambda (v) (apply-const-exps ces v))
                            free-vars)))
-      (if (any? null? const-exps)
+      (if (any? null? const-exps-list)
         '()
-        (let-bind-all free-vars const-exps body)))))
+        (let-bind-all free-vars const-exps-list body)))))
 
-(define (let-bind-all free-vars const-exps body)
+(define (let-bind-all free-vars const-exps-list body)
   (if (null? free-vars)
     body
     (let-bind-all (cdr free-vars)
-                  (cdr const-exps)
+                  (cdr const-exps-list)
                   (let-exp (car free-vars)
-                           (car const-exps)
+                           (car const-exps-list)
                            body))))
 
 (define (get-free-variables e bound-vars)
@@ -180,32 +180,28 @@
     (var-exp (var)
       (nameless-var-exp (apply-senv senv1 var)))
     (let-exp (var exp1 body)
-      (cases expression exp1
-        (const-exp (num)
-          (nameless-let-exp
-           exp1
+      (nameless-let-exp
+       (translation-of exp1 senv1 ces1 kps1)
+       (cases expression exp1
+         (const-exp (num)
            (translation-of body (extend-senv var senv1)
                                 (extend-const-exps var exp1 ces1)
-                                kps1)))
-        (proc-exp (arg body)
-          (let ((known-proc-body (make-known-proc-body arg body ces1)))
-            (nameless-let-exp
-             (translation-of exp1 senv1 ces1 kps1)
-             (translation-of body (extend-senv var senv1)
-                                  ces1
+                                kps1))
+         (proc-exp (arg pbody)
+           (translation-of body (extend-senv var senv1)
+                                ces1
+                                (let ((known-proc-body (make-known-proc-body arg pbody ces1)))
                                   (if (null? known-proc-body)
                                     kps1
-                                    (extend-known-procs var arg known-proc-body kps1))))))
+                                    (extend-known-procs var arg known-proc-body kps1)))))
         (else
-          (nameless-let-exp
-           (translation-of exp1 senv1 ces1 kps1)
            (translation-of body (extend-senv var senv1) ces1 kps1)))))
     (proc-exp (arg body)
       (nameless-proc-exp (translation-of body (extend-senv arg senv1) ces1 kps1)))
     (call-exp (func arg)
       (cases expression func
         (var-exp (fname)
-          (let ((known-proc (apply-known-procs fname kps1)))
+          (let ((known-proc (apply-known-procs kps1 fname)))
             (if (null? known-proc)
               (call-exp (translation-of func senv1 ces1 kps1)
                         (translation-of arg senv1 ces1 kps1))
@@ -213,9 +209,10 @@
                (let-exp (car known-proc)
                         arg
                         (cadr known-proc))
-               senv1 ces1 kps1))))
+              senv1 ces1 kps1))))
         (else
           (call-exp (translation-of func senv1 ces1 kps1)
                     (translation-of arg senv1 ces1 kps1)))))
     (else
      (eopl:error 'translation-of "Unable to translate ~s" e))))
+
