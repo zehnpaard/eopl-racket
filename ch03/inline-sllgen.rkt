@@ -8,7 +8,7 @@
     (number (digit (arbno digit)) number)))
 
 ; Grammar
-(define nameless-grammar
+(define inline-grammar
   '((program
      (expression)
      a-program)
@@ -60,3 +60,7 @@
      0)
     (else
      (+ 1 (apply-senv (cdr senv) var)))))
+
+; SLLGEN
+(sllgen:make-define-datatypes scanner-spec inline-grammar)
+(define scan-parse (sllgen:make-string-parser scanner-spec inline-grammar))
