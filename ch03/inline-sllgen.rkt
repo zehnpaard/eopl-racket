@@ -85,6 +85,23 @@
         val1
         (apply-const-exps env1 v)))))
 
+; known-proc environment
+(define-datatype known-procs known-procs?
+  (empty-known-procs)
+  (extend-known-procs
+   (var identifier?)
+   (body expression?)
+   (env const-exps?)))
+
+(define (apply-known-procs ces v)
+  (cases known-procs ces
+    (empty-known-procs ()
+      '())
+    (extend-known-procs (var1 exp1 env1)
+      (if (eq? v var1)
+        exp1
+        (apply-known-procs env1 v)))))
+
 ; Translation
 (define (translation-of-program p)
   (cases program p
