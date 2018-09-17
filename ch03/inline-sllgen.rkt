@@ -34,7 +34,7 @@
      ("proc (" identifier ")" expression)
      proc-exp)
     (expression
-     ("(" expression expression ")")
+     ("(" expression "," expression ")")
      call-exp)
     (expression
      ("%lexref" number)
