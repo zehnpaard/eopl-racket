@@ -115,6 +115,14 @@
                            free-vars)))
       (if (any? null? const-exps-list)
         '()
+        (replace-free-variables body (list arg) ces)))))
+
+(define (make-known-proc-body* arg body ces)
+  (let ((free-vars (get-free-variables body (list arg))))
+    (let ((const-exps-list (map (lambda (v) (apply-const-exps ces v))
+                           free-vars)))
+      (if (any? null? const-exps-list)
+        '()
         (let-bind-all free-vars const-exps-list body)))))
 
 (define (let-bind-all free-vars const-exps-list body)
@@ -153,6 +161,37 @@
               (get-free-variables arg bound-vars)))
     (else
       (eopl:error 'get-free-variables "Cannot get free variables of expression ~s" e))))
+
+(define (replace-free-variables e bound-vars ces)
+  (cases expression e
+    (const-exp (num)
+      (const-exp (num)))
+    (zero?-exp (exp1)
+      (zero?-exp
+       (replace-free-variables exp1 bound-vars ces)))
+    (diff-exp (exp1 exp2)
+      (diff-exp (replace-free-variables exp1 bound-vars ces)
+                (replace-free-variables exp2 bound-vars ces)))
+    (if-exp (cond-exp true-exp false-exp)
+      (if-exp (replace-free-variables cond-exp bound-vars ces)
+              (replace-free-variables true-exp bound-vars ces)
+              (replace-free-variables false-exp bound-vars ces)))
+    (var-exp (var)
+      (if (member var bound-vars)
+        (var-exp var)
+        (apply-const-exps ces var)))
+    (let-exp (var exp1 body)
+      (let-exp var
+               (replace-free-variables exp1 bound-vars ces)
+               (replace-free-variables body (cons var bound-vars) ces)))
+    (proc-exp (arg body)
+      (proc-exp arg
+                (replace-free-variables body (cons arg bound-vars) ces)))
+    (call-exp (func arg)
+      (call-exp (replace-free-variables func bound-vars ces)
+                (replace-free-variables arg bound-vars ces)))
+    (else
+      (eopl:error 'replace-free-variables "Cannot replace free variables of expression ~s" e))))
 
 ; Translation
 (define (translation-of-program p)
