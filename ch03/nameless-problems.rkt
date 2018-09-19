@@ -63,3 +63,11 @@
     (proc-val (p) p)
     (list-val (l) (map expval->val l))
     (else (eopl:error 'expval->proc "Cannot convert ~s to proc" v))))
+
+(define (value-of e env1)
+  (cases expression e
+    (emptylist-exp ()
+      (list-val '()))
+    (cons-exp (exp1 exp2)
+      (list-val (cons (value-of exp1 env1)
+                      (expval->list (value-of exp2 env1)))))))
