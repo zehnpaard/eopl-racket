@@ -34,7 +34,15 @@
      emptylist-exp)
     (expression
      ("cons(" expression "," expression ")")
-     cons-expression)))
+     cons-exp)))
+
+(define (translation-of e senv1)
+  (cases expression e
+    (emptylist-exp ()
+      (emptylist-exp))
+    (cons-exp (exp1 exp2)
+      (cons-exp (translation-of exp1 senv1)
+                (translation-of exp2 senv2)))))
 
 (define (all p xs)
   (if (null? xs)
