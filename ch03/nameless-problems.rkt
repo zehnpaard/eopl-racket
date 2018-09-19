@@ -25,3 +25,41 @@
   (cases expression e
     (cond-exp (conds vals)
       (value-of-cond conds vals env1))))
+
+;Problem 3.39
+
+(define nameless-grammar2
+  '((expression
+     ("emptylist")
+     emptylist-exp)
+    (expression
+     ("cons(" expression "," expression ")")
+     cons-expression)))
+
+(define (all p xs)
+  (if (null? xs)
+    #t
+    (and (p (car xs))
+         (all p (cdr xs)))))
+
+(define (list-of p)
+  (lambda (x)
+    (and (list? x)
+         (all p x))))
+
+(define-datatype expval expval?
+  (list-val
+   (vals (list-of expval?))))
+
+(define (expval->list v)
+  (cases expval v
+    (list-val (l) (map expval->val l))
+    (else (eopl:error 'expval->list "Cannot convert ~s to list" v))))
+
+(define (expval->val v)
+  (cases expval v
+    (num-val (n) n)
+    (bool-val (b) b)
+    (proc-val (p) p)
+    (list-val (l) (map expval->val l))
+    (else (eopl:error 'expval->proc "Cannot convert ~s to proc" v))))
