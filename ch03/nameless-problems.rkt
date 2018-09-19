@@ -34,7 +34,10 @@
      emptylist-exp)
     (expression
      ("cons(" expression "," expression ")")
-     cons-exp)))
+     cons-exp)
+    (expression
+     ("unpack" (arbno identifier) "=" expression "in" expression)
+     unpack-exp)))
 
 (define (translation-of e senv1)
   (cases expression e
