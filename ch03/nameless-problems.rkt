@@ -42,15 +42,20 @@
      ("%unpack" expression "in" expression)
      nameless-unpack-exp)))
 
-(define (translation-of-unpack is 
-
 (define (translation-of e senv1)
   (cases expression e
     (emptylist-exp ()
       (emptylist-exp))
     (cons-exp (exp1 exp2)
       (cons-exp (translation-of exp1 senv1)
-                (translation-of exp2 senv2)))))
+                (translation-of exp2 senv2)))
+    (unpack-exp (vars exp1 body)
+      (nameless-unpack-exp
+       (translation-of exp1 senv1)
+       (translation-of body (extend-senv* vars senv1))))))
+
+(define (extend-senv* vars senv)
+  (append vars senv))
 
 (define (all p xs)
   (if (null? xs)
