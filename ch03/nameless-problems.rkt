@@ -91,4 +91,10 @@
       (list-val '()))
     (cons-exp (exp1 exp2)
       (list-val (cons (value-of exp1 env1)
-                      (expval->list (value-of exp2 env1)))))))
+                      (expval->list (value-of exp2 env1)))))
+    (nameless-unpack-exp (exp1 body)
+      (value-of body
+        (extend-nameless-env* (value-of exp1 env1) env1)))))
+
+(define (extend-nameless-env* vals nenv)
+  (append vals nenv))
