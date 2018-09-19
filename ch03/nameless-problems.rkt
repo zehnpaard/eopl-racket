@@ -39,7 +39,7 @@
      ("unpack" (arbno identifier) "=" expression "in" expression)
      unpack-exp)
     (expression
-     ("%unpack" expression "in" expression)
+     ("%unpack" number expression "in" expression)
      nameless-unpack-exp)))
 
 (define (translation-of e senv1)
@@ -51,6 +51,7 @@
                 (translation-of exp2 senv2)))
     (unpack-exp (vars exp1 body)
       (nameless-unpack-exp
+       (length vars)
        (translation-of exp1 senv1)
        (translation-of body (extend-senv* vars senv1))))))
 
@@ -92,9 +93,16 @@
     (cons-exp (exp1 exp2)
       (list-val (cons (value-of exp1 env1)
                       (expval->list (value-of exp2 env1)))))
-    (nameless-unpack-exp (exp1 body)
-      (value-of body
-        (extend-nameless-env* (value-of exp1 env1) env1)))))
+    (nameless-unpack-exp (n exp1 body)
+      (let ((expval1 (value-of exp1 env1)))
+        (cases expval expval1
+          (listval (l)
+            (if (= n (length l))
+              (value-of body
+                (extend-nameless-env* l env1))
+              (eopl:error 'value-of "Incorrect number of items to unpack in ~s" exp1)))
+          (else
+            (eopl:error 'value-of "Unable to unpack non-list ~s" exp1)))))))
 
 (define (extend-nameless-env* vals nenv)
   (append vals nenv))
