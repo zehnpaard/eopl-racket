@@ -25,3 +25,84 @@
   (cases expression e
     (cond-exp (conds vals)
       (value-of-cond conds vals env1))))
+
+;Problem 3.39
+
+(define nameless-grammar2
+  '((expression
+     ("emptylist")
+     emptylist-exp)
+    (expression
+     ("cons(" expression "," expression ")")
+     cons-exp)
+    (expression
+     ("unpack" (arbno identifier) "=" expression "in" expression)
+     unpack-exp)
+    (expression
+     ("%unpack" number expression "in" expression)
+     nameless-unpack-exp)))
+
+(define (translation-of e senv1)
+  (cases expression e
+    (emptylist-exp ()
+      (emptylist-exp))
+    (cons-exp (exp1 exp2)
+      (cons-exp (translation-of exp1 senv1)
+                (translation-of exp2 senv2)))
+    (unpack-exp (vars exp1 body)
+      (nameless-unpack-exp
+       (length vars)
+       (translation-of exp1 senv1)
+       (translation-of body (extend-senv* vars senv1))))))
+
+(define (extend-senv* vars senv)
+  (append vars senv))
+
+(define (all p xs)
+  (if (null? xs)
+    #t
+    (and (p (car xs))
+         (all p (cdr xs)))))
+
+(define (list-of p)
+  (lambda (x)
+    (and (list? x)
+         (all p x))))
+
+(define-datatype expval expval?
+  (list-val
+   (vals (list-of expval?))))
+
+(define (expval->list v)
+  (cases expval v
+    (list-val (l) (map expval->val l))
+    (else (eopl:error 'expval->list "Cannot convert ~s to list" v))))
+
+(define (expval->val v)
+  (cases expval v
+    (num-val (n) n)
+    (bool-val (b) b)
+    (proc-val (p) p)
+    (list-val (l) (map expval->val l))
+    (else (eopl:error 'expval->proc "Cannot convert ~s to proc" v))))
+
+(define (value-of e env1)
+  (cases expression e
+    (emptylist-exp ()
+      (list-val '()))
+    (cons-exp (exp1 exp2)
+      (list-val (cons (value-of exp1 env1)
+                      (expval->list (value-of exp2 env1)))))
+    (nameless-unpack-exp (n exp1 body)
+      (let ((expval1 (value-of exp1 env1)))
+        (cases expval expval1
+          (listval (l)
+            (if (= n (length l))
+              (value-of body
+                (extend-nameless-env* l env1))
+              (eopl:error 'value-of "Incorrect number of items to unpack in ~s" exp1)))
+          (else
+            (eopl:error 'value-of "Unable to unpack non-list ~s" exp1)))))))
+
+(define (extend-nameless-env* vals nenv)
+  (append vals nenv))
