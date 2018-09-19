@@ -37,7 +37,12 @@
      cons-exp)
     (expression
      ("unpack" (arbno identifier) "=" expression "in" expression)
-     unpack-exp)))
+     unpack-exp)
+    (expression
+     ("%unpack" expression "in" expression)
+     nameless-unpack-exp)))
+
+(define (translation-of-unpack is 
 
 (define (translation-of e senv1)
   (cases expression e
