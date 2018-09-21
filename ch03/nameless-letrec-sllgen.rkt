@@ -43,6 +43,9 @@
      ("%lexref" number)
      nameless-var-exp)
     (expression
+     ("%lexrefrec" number)
+     nameless-letrec-var-exp)
+    (expression
      ("%let" expression "in" expression)
      nameless-let-exp)
     (expression
@@ -96,7 +99,10 @@
               (translation-of true-exp senv1)
               (translation-of false-exp senv1)))
     (var-exp (var)
-      (nameless-var-exp (apply-senv senv1 var)))
+      (let ((res (apply-senv senv1 var)))
+        (if (cadr res)
+          (nameless-letrec-var-exp (car res))
+          (nameless-var-exp (car res)))))
     (let-exp (var exp1 body)
       (nameless-let-exp
        (translation-of exp1 senv1)
