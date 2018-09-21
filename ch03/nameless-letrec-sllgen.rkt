@@ -37,6 +37,9 @@
      ("(" expression "," expression ")")
      call-exp)
     (expression
+     ("letrec" identifier "(" identifier ") =" expression "in" expression)
+     letrec-exp)
+    (expression
      ("%lexref" number)
      nameless-var-exp)
     (expression
@@ -44,7 +47,10 @@
      nameless-let-exp)
     (expression
      ("%lexproc" expression)
-     nameless-proc-exp)))
+     nameless-proc-exp)
+    (expression
+     ("%letrec" expression "in" expression)
+     nameless-letrec-exp)))
 
 ; Static environment
 (define (empty-senv) '())
