@@ -56,16 +56,20 @@
 (define (empty-senv) '())
 
 (define (extend-senv var senv)
-  (cons var senv))
+  (cons (list var #f) senv))
+
+(define (extend-senv-rec var senv)
+  (cons (list var #t) senv))
 
 (define (apply-senv senv var)
   (cond
     ((null? senv)
      (eopl:error 'apply-senv "Variable ~s not found" var))
-    ((eqv? var (car senv))
-     0)
+    ((eqv? var (car (car senv)))
+     (list 0 (cadr (car senv))))
     (else
-     (+ 1 (apply-senv (cdr senv) var)))))
+     (let ((res (apply-senv (cdr senv) var))) 
+       (list (+ 1 (car res)) (cadr res))))))
 
 ; SLLGEN
 (sllgen:make-define-datatypes scanner-spec nameless-grammar)
