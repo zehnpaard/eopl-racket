@@ -52,17 +52,28 @@
 ; Static environment
 (define (empty-senv) '())
 
-(define (extend-senv var senv)
-  (cons var senv))
+(define (extend-senv vars senv)
+  (cons vars senv))
 
 (define (apply-senv senv var)
+  (if (null? senv)
+    (eopl:error 'apply-senv "Variable ~s not found" var)
+    (let ((res (apply-senv-rib (car senv) var 0)))
+      (if res
+        (list 0 res)
+        (inc-first (apply-senv (cdr senv) var))))))
+
+(define (inc-first ab)
+  (list (+ 1 (car ab)) (cadr ab)))
+
+(define (apply-senv-rib senv-rib var n)
   (cond
-    ((null? senv)
-     (eopl:error 'apply-senv "Variable ~s not found" var))
-    ((eqv? var (car senv))
-     0)
+    ((null? senv-rib)
+     #f)
+    ((eqv? var (car senv-rib))
+     n)
     (else
-     (+ 1 (apply-senv (cdr senv) var)))))
+     (apply-senv-rib (cdr senv-rib) var (+ n 1)))))
 
 ; SLLGEN
 (sllgen:make-define-datatypes scanner-spec nameless-grammar)
