@@ -113,6 +113,11 @@
     (call-exp (func arg)
        (call-exp (translation-of func senv1)
                  (translation-of arg senv1)))
+    (letrec-exp (var farg fbody body)
+      (nameless-letrec-exp
+       (let ((rec-senv (extend-senv-rec var senv1)))
+         (translation-of fbody (extend-senv farg rec-senv))
+         (translation-of body rec-senv))))
     (else
      (eopl:error 'translation-of "Unable to translate expression ~s" e))))
 
