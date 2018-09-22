@@ -27,8 +27,11 @@
     (expression
      ("if" expression "then" expression "else" expression)
      if-exp)
+    (id-exp-pair
+     (identifier "=" expression)
+     id-exp-p)
     (expression
-     ("let" identifier "=" expression "in" expression)
+     ("let" (separated-list id-exp-pair ",") "in" expression)
      let-exp)
     (expression
      ("proc (" identifier ")" expression)
@@ -72,6 +75,16 @@
       (a-program
        (translation-of e (empty-senv))))))
 
+(define (get-id iep)
+  (cases id-exp-pair iep
+    (id-exp-p (id1 exp1)
+      id1)))
+
+(define (get-exp iep)
+  (cases id-exp-pair iep
+    (id-exp-p (id1 exp1)
+      exp1)))
+
 (define (translation-of e senv1)
   (cases expression e
     (const-exp (num)
@@ -87,10 +100,10 @@
               (translation-of false-exp senv1)))
     (var-exp (var)
       (nameless-var-exp (apply-senv senv1 var)))
-    (let-exp (var exp1 body)
+    (let-exp (ieps body)
       (nameless-let-exp
-       (translation-of exp1 senv1)
-       (translation-of body (extend-senv var senv1))))
+       (map (lambda (x) (translation-of (get-exp x) senv1)) ieps)
+       (translation-of body (extend-senv (map get-id ieps) senv1))))
     (proc-exp (arg body)
       (nameless-proc-exp
        (translation-of body (extend-senv arg senv1))))
