@@ -147,7 +147,10 @@
 
 ; nameless environment
 (define (nameless-environment? x)
-  ((list-of expval?) x))
+  ((list-of (orp expval? expression?)) x))
+
+(define (orp p1 p2)
+  (lambda (x) (or (p1 x) (p2 x))))
 
 (define (empty-nameless-env)
   '())
@@ -195,6 +198,9 @@
         (extend-nameless-env (value-of exp1 env1) env1)))
     (nameless-proc-exp (body)
       (proc-val (procedure body env1)))
+    (nameless-letrec-exp (exp1 body)
+      (value-of body
+        (extend-nameless-env exp1 env1)))
     (else
       (eopl:error 'value-of "Cannot get value of expression ~s" e))))
 
