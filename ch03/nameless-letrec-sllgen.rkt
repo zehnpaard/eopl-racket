@@ -128,7 +128,10 @@
   (bool-val
    (bool boolean?))
   (proc-val
-   (proc proc?)))
+   (proc proc?))
+  (recproc-val
+   (body expression?)
+   (penv nameless-environment?)))
 
 (define (expval->num v)
   (cases expval v
@@ -145,12 +148,14 @@
     (proc-val (p) p)
     (else (eopl:error 'expval->proc "Cannot convert ~s to proc" v))))
 
+(define (expval->recproc v)
+  (cases expval v
+    (recproc-val (body penv) (list body penv))
+    (else (eopl:error 'expval->proc "Cannot convert ~s to recproc" v))))
+
 ; nameless environment
 (define (nameless-environment? x)
-  ((list-of (orp expval? expression?)) x))
-
-(define (orp p1 p2)
-  (lambda (x) (or (p1 x) (p2 x))))
+  ((list-of expval?) x))
 
 (define (empty-nameless-env)
   '())
@@ -200,7 +205,13 @@
       (proc-val (procedure body env1)))
     (nameless-letrec-exp (exp1 body)
       (value-of body
-        (extend-nameless-env exp1 env1)))
+        (extend-nameless-env (recproc-val exp1 env1) env1)))
+    (nameless-letrec-var-exp (n)
+      (let ((recproc1 (expval->recproc (apply-nameless-env env1 n))))
+        (proc-val
+         (procedure (car recproc1)
+                    (extend-nameless-env (cadr recproc1)
+                                         (recproc-val recproc1))))))
     (else
       (eopl:error 'value-of "Cannot get value of expression ~s" e))))
 
