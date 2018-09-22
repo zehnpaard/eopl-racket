@@ -113,6 +113,11 @@
     (call-exp (func arg)
        (call-exp (translation-of func senv1)
                  (translation-of arg senv1)))
+    (letrec-exp (var farg fbody body)
+      (nameless-letrec-exp
+       (let ((rec-senv (extend-senv-rec var senv1)))
+         (translation-of fbody (extend-senv farg rec-senv))
+         (translation-of body rec-senv))))
     (else
      (eopl:error 'translation-of "Unable to translate expression ~s" e))))
 
@@ -123,7 +128,10 @@
   (bool-val
    (bool boolean?))
   (proc-val
-   (proc proc?)))
+   (proc proc?))
+  (recproc-val
+   (body expression?)
+   (penv nameless-environment?)))
 
 (define (expval->num v)
   (cases expval v
@@ -139,6 +147,11 @@
   (cases expval v
     (proc-val (p) p)
     (else (eopl:error 'expval->proc "Cannot convert ~s to proc" v))))
+
+(define (expval->recproc v)
+  (cases expval v
+    (recproc-val (body penv) (list body penv))
+    (else (eopl:error 'expval->proc "Cannot convert ~s to recproc" v))))
 
 ; nameless environment
 (define (nameless-environment? x)
@@ -190,6 +203,15 @@
         (extend-nameless-env (value-of exp1 env1) env1)))
     (nameless-proc-exp (body)
       (proc-val (procedure body env1)))
+    (nameless-letrec-exp (exp1 body)
+      (value-of body
+        (extend-nameless-env (recproc-val exp1 env1) env1)))
+    (nameless-letrec-var-exp (n)
+      (let ((recproc1 (expval->recproc (apply-nameless-env env1 n))))
+        (proc-val
+         (procedure (car recproc1)
+                    (extend-nameless-env (cadr recproc1)
+                                         (recproc-val recproc1))))))
     (else
       (eopl:error 'value-of "Cannot get value of expression ~s" e))))
 
