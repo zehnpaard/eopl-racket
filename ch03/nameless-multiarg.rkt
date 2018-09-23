@@ -151,16 +151,16 @@
 
 ; nameless environment
 (define (nameless-environment? x)
-  ((list-of expval?) x))
+  ((list-of (list-of expval?)) x))
 
 (define (empty-nameless-env)
   '())
 
-(define (extend-nameless-env val nenv)
-  (cons val nenv))
+(define (extend-nameless-env vals nenv)
+  (cons vals nenv))
 
-(define (apply-nameless-env nenv n)
-  (list-ref nenv n))
+(define (apply-nameless-env nenv n1 n2)
+  (list-ref (list-ref nenv n1) n2))
 
 ; procedure
 (define-datatype proc proc?
