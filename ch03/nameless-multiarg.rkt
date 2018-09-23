@@ -194,9 +194,11 @@
        (value-of arg env1)))
     (nameless-var-exp (n1 n2)
       (apply-nameless-env env1 n1 n2))
-    (nameless-let-exp (exp1 body)
+    (nameless-let-exp (exps body)
       (value-of body
-        (extend-nameless-env (value-of exp1 env1) env1)))
+        (extend-nameless-env
+         (map (lambda (x) (value-of x env1)) exps)
+         env1)))
     (nameless-proc-exp (body)
       (proc-val (procedure body env1)))
     (else
