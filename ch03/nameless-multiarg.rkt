@@ -34,16 +34,16 @@
      ("let" (separated-list id-exp-pair ",") "in" expression)
      let-exp)
     (expression
-     ("proc (" identifier ")" expression)
+     ("proc (" (arbno identifier) ")" expression)
      proc-exp)
     (expression
-     ("(" expression "," expression ")")
+     ("(" expression "," (arbno expression) ")")
      call-exp)
     (expression
-     ("%lexref" number)
+     ("%lexref" number number)
      nameless-var-exp)
     (expression
-     ("%let" expression "in" expression)
+     ("%let" (arbno expression) "in" expression)
      nameless-let-exp)
     (expression
      ("%lexproc" expression)
@@ -110,17 +110,18 @@
               (translation-of true-exp senv1)
               (translation-of false-exp senv1)))
     (var-exp (var)
-      (nameless-var-exp (apply-senv senv1 var)))
+      (let ((pos (apply-senv senv1 var)))
+        (nameless-var-exp (car pos) (cadr pos))))
     (let-exp (ieps body)
       (nameless-let-exp
        (map (lambda (x) (translation-of (get-exp x) senv1)) ieps)
        (translation-of body (extend-senv (map get-id ieps) senv1))))
-    (proc-exp (arg body)
+    (proc-exp (args body)
       (nameless-proc-exp
-       (translation-of body (extend-senv arg senv1))))
-    (call-exp (func arg)
+       (translation-of body (extend-senv args senv1))))
+    (call-exp (func args)
        (call-exp (translation-of func senv1)
-                 (translation-of arg senv1)))
+                 (map (lambda (x) (translation-of x senv1)) args)))
     (else
      (eopl:error 'translation-of "Unable to translate expression ~s" e))))
 
@@ -150,16 +151,16 @@
 
 ; nameless environment
 (define (nameless-environment? x)
-  ((list-of expval?) x))
+  ((list-of (list-of expval?)) x))
 
 (define (empty-nameless-env)
   '())
 
-(define (extend-nameless-env val nenv)
-  (cons val nenv))
+(define (extend-nameless-env vals nenv)
+  (cons vals nenv))
 
-(define (apply-nameless-env nenv n)
-  (list-ref nenv n))
+(define (apply-nameless-env nenv n1 n2)
+  (list-ref (list-ref nenv n1) n2))
 
 ; procedure
 (define-datatype proc proc?
@@ -167,10 +168,10 @@
    (body expression?)
    (penv nameless-environment?)))
 
-(define (apply-procedure proc1 arg)
+(define (apply-procedure proc1 args)
   (cases proc proc1
     (procedure (body penv)
-      (value-of body (extend-nameless-env arg penv)))))
+      (value-of body (extend-nameless-env args penv)))))
 
 ; interpreter
 
@@ -187,15 +188,17 @@
       (if (expval->bool (value-of cond-exp env1))
         (value-of true-exp env1)
         (value-of false-exp env1)))
-    (call-exp (func arg)
+    (call-exp (func args)
       (apply-procedure
        (expval->proc (value-of func env1))
-       (value-of arg env1)))
-    (nameless-var-exp (n)
-      (apply-nameless-env env1 n))
-    (nameless-let-exp (exp1 body)
+       (map (lambda (x) (value-of x env1)) args)))
+    (nameless-var-exp (n1 n2)
+      (apply-nameless-env env1 n1 n2))
+    (nameless-let-exp (exps body)
       (value-of body
-        (extend-nameless-env (value-of exp1 env1) env1)))
+        (extend-nameless-env
+         (map (lambda (x) (value-of x env1)) exps)
+         env1)))
     (nameless-proc-exp (body)
       (proc-val (procedure body env1)))
     (else
