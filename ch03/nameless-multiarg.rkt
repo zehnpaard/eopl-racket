@@ -168,10 +168,10 @@
    (body expression?)
    (penv nameless-environment?)))
 
-(define (apply-procedure proc1 arg)
+(define (apply-procedure proc1 args)
   (cases proc proc1
     (procedure (body penv)
-      (value-of body (extend-nameless-env arg penv)))))
+      (value-of body (extend-nameless-env args penv)))))
 
 ; interpreter
 
@@ -188,10 +188,10 @@
       (if (expval->bool (value-of cond-exp env1))
         (value-of true-exp env1)
         (value-of false-exp env1)))
-    (call-exp (func arg)
+    (call-exp (func args)
       (apply-procedure
        (expval->proc (value-of func env1))
-       (value-of arg env1)))
+       (map (lambda (x) (value-of x env1)) args)))
     (nameless-var-exp (n1 n2)
       (apply-nameless-env env1 n1 n2))
     (nameless-let-exp (exps body)
