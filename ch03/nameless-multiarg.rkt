@@ -116,12 +116,12 @@
       (nameless-let-exp
        (map (lambda (x) (translation-of (get-exp x) senv1)) ieps)
        (translation-of body (extend-senv (map get-id ieps) senv1))))
-    (proc-exp (arg body)
+    (proc-exp (args body)
       (nameless-proc-exp
-       (translation-of body (extend-senv arg senv1))))
-    (call-exp (func arg)
+       (translation-of body (extend-senv args senv1))))
+    (call-exp (func args)
        (call-exp (translation-of func senv1)
-                 (translation-of arg senv1)))
+                 (map (lambda (x) (translation-of x senv1)) args)))
     (else
      (eopl:error 'translation-of "Unable to translate expression ~s" e))))
 
