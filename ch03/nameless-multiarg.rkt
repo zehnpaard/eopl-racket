@@ -40,10 +40,10 @@
      ("(" expression "," expression ")")
      call-exp)
     (expression
-     ("%lexref" number)
+     ("%lexref" number number)
      nameless-var-exp)
     (expression
-     ("%let" expression "in" expression)
+     ("%let" (arbno expression) "in" expression)
      nameless-let-exp)
     (expression
      ("%lexproc" expression)
@@ -110,7 +110,8 @@
               (translation-of true-exp senv1)
               (translation-of false-exp senv1)))
     (var-exp (var)
-      (nameless-var-exp (apply-senv senv1 var)))
+      (let ((pos (apply-senv senv1 var)))
+        (nameless-var-exp (car pos) (cadr pos))))
     (let-exp (ieps body)
       (nameless-let-exp
        (map (lambda (x) (translation-of (get-exp x) senv1)) ieps)
@@ -191,8 +192,8 @@
       (apply-procedure
        (expval->proc (value-of func env1))
        (value-of arg env1)))
-    (nameless-var-exp (n)
-      (apply-nameless-env env1 n))
+    (nameless-var-exp (n1 n2)
+      (apply-nameless-env env1 n1 n2))
     (nameless-let-exp (exp1 body)
       (value-of body
         (extend-nameless-env (value-of exp1 env1) env1)))
