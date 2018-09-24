@@ -126,7 +126,7 @@
 (define (get-store)
   the-store)
 
-(define (initialize-store)
+(define (initialize-store!)
   (set! the-store (empty-store)))
 
 (define (reference? v)
@@ -158,6 +158,7 @@
   (value-of-program (scan-parse s)))
 
 (define (value-of-program p)
+  (initialize-store!)
   (cases program p
     (a-program (e)
       (value-of e (empty-env)))))
