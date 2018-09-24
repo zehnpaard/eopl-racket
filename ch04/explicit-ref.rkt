@@ -100,6 +100,31 @@
     (procedure (var body penv)
        (value-of body (extend-env var val penv)))))
 
+; store
+(define (empty-store)
+  '())
+
+(define the-store 'uninitialized)
+
+(define (get-store)
+  the-store)
+
+(define (initialize-store)
+  (set! the-store (empty-store)))
+
+(define (reference? v)
+  (integer? v))
+
+(define (newref val)
+  (let ((next-ref (length the-store)))
+    (set! the-store (append the-store (list val)))
+    (next-ref)))
+
+(define (deref ref)
+  (list-ref the-store ref))
+
+
+
 ; Interpreter
 
 (define (run s)
