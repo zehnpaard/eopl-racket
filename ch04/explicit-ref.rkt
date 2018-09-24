@@ -35,7 +35,16 @@
      proc-exp)
     (expression
      ("(" expression "," expression ")")
-     call-exp)))
+     call-exp)
+    (expression
+     ("newref (" expression ")")
+     newref-exp)
+    (expression
+     ("deref (" expression ")")
+     deref-exp)
+    (expression
+     ("setref (" expression "," expression ")")
+     setref-exp)))
 
 ; SLLGEN
 (sllgen:make-define-datatypes scanner-spec1 proc-grammar)
