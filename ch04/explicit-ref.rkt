@@ -57,7 +57,9 @@
   (bool-val
    (bool boolean?))
   (proc-val
-   (proc proc?)))
+   (proc proc?))
+  (ref-val
+   (ref number?)))
 
 (define expval->num
   (lambda (v)
@@ -76,6 +78,12 @@
     (cases expval v
       (proc-val (p) p)
       (else (eopl:error 'expval->proc "Cannot convert non-proc-val ~s to proc" v)))))
+
+(define expval->ref
+  (lambda (v)
+    (cases expval v
+      (ref-val (r) r)
+      (else (eopl:error 'expval->ref "Cannot convert non-ref-val ~s to ref" v)))))
 
 ; environment constructors and accessors
 
@@ -125,9 +133,8 @@
   (integer? v))
 
 (define (newref val)
-  (let ((next-ref (length the-store)))
-    (set! the-store (append the-store (list val)))
-    (next-ref)))
+  (set! the-store (append the-store (list val)))
+  (- (length the-store) 1))
 
 (define (deref ref)
   (list-ref the-store ref))
@@ -177,4 +184,13 @@
     (call-exp (e1 e2)
       (apply-procedure
        (expval->proc (value-of e1 env1))
-       (value-of e2 env1)))))
+       (value-of e2 env1)))
+    (newref-exp (exp1)
+       (ref-val (newref (value-of exp1 env1))))
+    (deref-exp (exp1)
+       (deref (expval->ref (value-of exp1 env1))))
+    (setref-exp (exp1 exp2)
+       (begin
+         (setref! (expval->ref (value-of exp1 env1))
+                  (value-of exp2 env1))
+         (num-val 23)))))
