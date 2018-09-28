@@ -81,3 +81,9 @@
      ("begin" expression-list "end")
      begin-exp)))
 
+(define (value-of e env1)
+  (cases expression e
+    (begin-exp (exps)
+      (let ((vs (map (lambda (e) (value-of e env1)) exps)))
+        (last vs)))))
+
