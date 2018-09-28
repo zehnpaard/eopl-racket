@@ -68,3 +68,16 @@
 
 (define (setref! ref val)
   (vector-set! the-store ref val))
+
+;4.10
+(define proc-grammar
+  '((program
+     (expression)
+     a-program)
+    (expression-list
+     (separated-list expression ";")
+     exp-list)
+    (expression
+     ("begin" expression-list "end")
+     begin-exp)))
+
