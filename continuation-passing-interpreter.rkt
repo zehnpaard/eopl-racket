@@ -12,8 +12,8 @@
             (num2 (expval->num (value-of exp2 env))))
         (num-val (- num1 num2))))
     (zero?-exp (exp1)
-      (let ((num1 (expval->num (value-of exp1 env))))
-        (if (zero? num1) (bool-val #t) (bool-val #f))))
+      (bool-val 
+        (zero? (expval->num (value-of exp1 env)))))
     (if-exp (exp1 exp2 exp3)
       (if (expval->bool (value-of exp1 env))
         (value-of exp2 env)
