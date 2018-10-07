@@ -8,9 +8,9 @@
     (const-exp (num) (num-bal num))
     (var-exp (var) (apply-env env var))
     (diff-exp (exp1 exp2)
-      (let ((num1 (expval->num (value-of exp1 env)))
-            (num2 (expval->num (value-of exp2 env))))
-        (num-val (- num1 num2))))
+      (num-val
+        (- (expval->num (value-of exp1 env))
+           (expval->num (value-of exp2 env)))))
     (zero?-exp (exp1)
       (bool-val 
         (zero? (expval->num (value-of exp1 env)))))
