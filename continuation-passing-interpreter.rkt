@@ -23,9 +23,9 @@
     (proc-exp (var body)
       (proc-val (procedure var body env)))
     (call-exp (rator rand)
-      (let ((proc1 (expval->proc (value-of rator env)))
-            (arg (value-of rand env))))
-      (apply-procedure proc1 arg))
+      (apply-procedure
+        (expval->proc (value-of rator env))
+        (value-of rand env)))
     (letrec-exp (p-name b-var p-body letrec-body)
       (value-of letrec-body
         (extend-env-rec p-name b-var p-body env)))
