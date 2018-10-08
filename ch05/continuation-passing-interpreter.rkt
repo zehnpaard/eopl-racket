@@ -36,3 +36,27 @@
     (procedure (var body saved-env)
       (value-of body (extend-env var val saved-env)))))
 
+(define (end-cont)
+  (lambda (val)
+    (begin
+      (eopl:printf "End of computation.~%")
+      val)))
+
+(define (zero1-cont cont)
+  (lambda (val)
+    (apply-cont cont
+      (bool-val
+        (zero? (expval->num val))))))
+
+(define (let-exp-cont var body env cont)
+  (lambda (val)
+    (value-of/k body (extend-env var val env) cont)))
+
+(define (if-test-cont exp2 exp3 env cont)
+  (lambda (val)
+    (if (expval->bool val)
+      (value-of/k exp2 env cont)
+      (value-of/k exp3 env cont))))
+
+(define (apply-cont cont v)
+  (cont v))
