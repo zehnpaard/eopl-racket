@@ -46,6 +46,8 @@
         cont))
     (zero?-exp (exp1)
       (value-of/k exp1 env (zero1-cont cont)))
+    (let-exp (var exp1 body)
+      (value-of/k exp1 env (let-exp-cont var body env cont)))
     ))
 
 (define (apply-procedure proc1 val)
