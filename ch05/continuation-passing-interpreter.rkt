@@ -44,6 +44,8 @@
       (value-of/k letrec-body
         (extend-env-rec p-name b-var p-body env)
         cont))
+    (zero?-exp (exp1)
+      (value-of/k exp1 env (zero1-cont cont)))
     ))
 
 (define (apply-procedure proc1 val)
