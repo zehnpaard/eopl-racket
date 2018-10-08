@@ -1,7 +1,7 @@
 (define (value-of-program pgm)
   (cases program pgm
     (a-program (exp1)
-      (value-of exp1 (init-env)))))
+      (value-of/k exp1 (init-env) (end-cont)))))
 
 (define (value-of exp env)
   (cases expression exp
@@ -29,6 +29,17 @@
     (letrec-exp (p-name b-var p-body letrec-body)
       (value-of letrec-body
         (extend-env-rec p-name b-var p-body env)))
+    ))
+
+(define (value-of/k exp env cont)
+  (cases expression exp
+    (const-exp (num)
+      (apply-cont cont (num-val num)))
+    (var-exp (var)
+      (apply-cont cont (apply-env env var)))
+    (proc-exp (var body)
+      (apply-cont cont
+        (proc-val (procedure var body env))))
     ))
 
 (define (apply-procedure proc1 val)
