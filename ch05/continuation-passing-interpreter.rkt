@@ -64,5 +64,9 @@
         (- (expval->num val1)
            (expval->num val2))))))
 
+(define (rator-cont rand env cont)
+  (lambda (rator)
+    (value-of/k rand env (rand-cont rator cont))))
+
 (define (apply-cont cont v)
   (cont v))
