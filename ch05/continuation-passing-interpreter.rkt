@@ -26,10 +26,10 @@
       (value-of/k rator env (rator-cont rand env cont)))
     ))
 
-(define (apply-procedure/k proc1 val cont)
+(define (apply-procedure/k proc1 arg1 cont)
   (cases proc proc1
     (procedure (var body saved-env)
-      (value-of/k body (extend-env var val saved-env) cont))))
+      (value-of/k body (extend-env var arg1 saved-env) cont))))
 
 (define (end-cont)
   (lambda (val)
@@ -65,12 +65,12 @@
            (expval->num val2))))))
 
 (define (rator-cont rand env cont)
-  (lambda (rator)
-    (value-of/k rand env (rand-cont rator cont))))
+  (lambda (proc1)
+    (value-of/k rand env (rand-cont proc1 cont))))
 
-(define (rand-cont rator cont)
-  (lambda (rand)
-    (apply-procedure/k rator rand cont)))
+(define (rand-cont proc1 cont)
+  (lambda (arg1)
+    (apply-procedure/k proc1 arg1 cont)))
 
 (define (apply-cont cont v)
   (cont v))
