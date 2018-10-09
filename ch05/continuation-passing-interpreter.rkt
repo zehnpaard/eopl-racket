@@ -68,5 +68,9 @@
   (lambda (rator)
     (value-of/k rand env (rand-cont rator cont))))
 
+(define (rand-cont rator cont)
+  (lambda (rand)
+    (apply-procedure/k rator rand cont)))
+
 (define (apply-cont cont v)
   (cont v))
