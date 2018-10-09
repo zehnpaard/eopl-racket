@@ -20,12 +20,16 @@
       (value-of/k exp1 env (let-exp-cont var body env cont)))
     (if-exp (exp1 exp2 exp3)
       (value-of/k exp1 env (if-test-cont exp2 exp3 env cont)))
+    (diff-exp (exp1 exp2)
+      (value-of/k exp1 env (diff1-cont exp2 env cont)))
+    (call-exp (rator rand)
+      (value-of/k rator env (rator-cont rand env cont)))
     ))
 
-(define (apply-procedure proc1 val)
+(define (apply-procedure/k proc1 arg1 cont)
   (cases proc proc1
     (procedure (var body saved-env)
-      (value-of body (extend-env var val saved-env)))))
+      (value-of/k body (extend-env var arg1 saved-env) cont))))
 
 (define (end-cont)
   (lambda (val)
@@ -48,6 +52,25 @@
     (if (expval->bool val)
       (value-of/k exp2 env cont)
       (value-of/k exp3 env cont))))
+
+(define (diff1-cont exp2 env cont)
+  (lambda (val)
+    (value-of/k exp2 env (diff2-cont val cont))))
+
+(define (diff2-cont val1 cont)
+  (lambda (val2)
+    (apply-cont cont
+      (num-val
+        (- (expval->num val1)
+           (expval->num val2))))))
+
+(define (rator-cont rand env cont)
+  (lambda (proc1)
+    (value-of/k rand env (rand-cont proc1 cont))))
+
+(define (rand-cont proc1 cont)
+  (lambda (arg1)
+    (apply-procedure/k proc1 arg1 cont)))
 
 (define (apply-cont cont v)
   (cont v))
