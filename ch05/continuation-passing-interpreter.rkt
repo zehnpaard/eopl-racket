@@ -20,6 +20,8 @@
       (value-of/k exp1 env (let-exp-cont var body env cont)))
     (if-exp (exp1 exp2 exp3)
       (value-of/k exp1 env (if-test-cont exp2 exp3 env cont)))
+    (diff-exp (exp1 exp2)
+      (value-of/k exp1 env (diff1-cont exp2 env cont)))
     ))
 
 (define (apply-procedure proc1 val)
@@ -48,6 +50,17 @@
     (if (expval->bool val)
       (value-of/k exp2 env cont)
       (value-of/k exp3 env cont))))
+
+(define (diff1-cont exp2 env cont)
+  (lambda (val)
+    (value-of/k exp2 env (diff2-cont val cont))))
+
+(define (diff2-cont val1 cont)
+  (lambda (val2)
+    (apply-cont cont
+      (num-val
+        (- (expval->num val1)
+           (expval->num val2))))))
 
 (define (apply-cont cont v)
   (cont v))
