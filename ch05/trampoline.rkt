@@ -40,3 +40,17 @@
       (if (expval->bool val)
         (value-of/k exp2 saved-env saved-cont)
         (value-of/k exp3 saved-env saved-cont)))))
+
+(define (value-of/k exp env cont)
+  (cases expression exp
+    (const-exp (num)
+      (apply-cont cont (num-val num)))
+    (var-exp (var)
+      (apply-cont cont (apply-env env var)))
+    (proc-exp (var body)
+      (apply-cont cont (proc-val (procedure var body env))))
+    (letrec-exp (p-name b-var p-body letrec-body)
+      (value-of/k letrec-body
+                  (exnted-env-rec p-name b-var p-body env)
+                  cont))
+    ))
