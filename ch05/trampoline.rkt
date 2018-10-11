@@ -27,6 +27,9 @@
     (exp2 expression?)
     (env environment?)
     (cont continuation?))
+  (diff2-cont
+    (val1 expval?)
+    (cont continuation?))
   )
 
 (define (apply-cont cont val)
@@ -47,6 +50,10 @@
         (value-of/k exp3 saved-env saved-cont)))
     (diff1-cont (exp2 saved-env saved-cont)
       (value-of/k exp2 saved-env (diff2-cont val saved-cont)))
+    (diff2-cont (val1 saved-cont)
+      (apply-cont saved-cont
+        (num-val (- (expval->num val1)
+                    (expval->num val)))))
     ))
 
 (define (value-of/k exp env cont)
