@@ -30,6 +30,10 @@
   (diff2-cont
     (val1 expval?)
     (cont continuation?))
+  (rator-cont
+    (rand expression?)
+    (env environment?)
+    (cont continuation?))
   )
 
 (define (apply-cont cont val)
@@ -54,6 +58,8 @@
       (apply-cont saved-cont
         (num-val (- (expval->num val1)
                     (expval->num val)))))
+    (rator-cont (rand saved-env saved-cont)
+      (value-of/k rand saved-env (rand-cont val saved-cont)))
     ))
 
 (define (value-of/k exp env cont)
@@ -76,4 +82,6 @@
       (value-of/k exp1 env (if-test-cont exp2 exp3 env cont)))
     (diff-exp (exp1 exp2)
       (value-of/k exp1 env (diff1-cont exp2 env cont)))
+    (call-exp (rator rand)
+      (value-of/k rator env (rator-cont rand env cont)))
     ))
