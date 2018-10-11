@@ -53,4 +53,10 @@
       (value-of/k letrec-body
                   (exnted-env-rec p-name b-var p-body env)
                   cont))
+    (zero?-exp (exp1)
+      (value-of/k exp1 env (zero1-cont cont)))
+    (let-exp (var exp1 body)
+      (value-of/k exp1 env (let-exp-cont var body env cont)))
+    (if-exp (exp1 exp2 exp3)
+      (value-of/k exp1 env (if-test-cont exp2 exp3 env cont)))
     ))
