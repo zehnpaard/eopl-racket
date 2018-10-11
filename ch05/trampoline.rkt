@@ -22,7 +22,12 @@
     (exp2 expression?)
     (exp3 expression?)
     (env environment?)
-    (cont continuation?)))
+    (cont continuation?))
+  (diff1-cont
+    (exp2 expression?)
+    (env environment?)
+    (cont continuation?))
+  )
 
 (define (apply-cont cont val)
   (cases continuation cont
@@ -39,7 +44,10 @@
     (if-test-cont (exp2 exp3 saved-env saved-cont)
       (if (expval->bool val)
         (value-of/k exp2 saved-env saved-cont)
-        (value-of/k exp3 saved-env saved-cont)))))
+        (value-of/k exp3 saved-env saved-cont)))
+    (diff1-cont (exp2 saved-env saved-cont)
+      (value-of/k exp2 saved-env (diff2-cont val saved-cont)))
+    ))
 
 (define (value-of/k exp env cont)
   (cases expression exp
@@ -59,4 +67,6 @@
       (value-of/k exp1 env (let-exp-cont var body env cont)))
     (if-exp (exp1 exp2 exp3)
       (value-of/k exp1 env (if-test-cont exp2 exp3 env cont)))
+    (diff-exp (exp1 exp2)
+      (value-of/k exp1 env (diff1-cont exp2 env cont)))
     ))
