@@ -34,6 +34,9 @@
     (rand expression?)
     (env environment?)
     (cont continuation?))
+  (rand-cont
+    (val1 expval?)
+    (cont continuation?))
   )
 
 (define (apply-cont cont val)
@@ -60,6 +63,8 @@
                     (expval->num val)))))
     (rator-cont (rand saved-env saved-cont)
       (value-of/k rand saved-env (rand-cont val saved-cont)))
+    (rand-cont (val1 saved-cont)
+      (apply-procedure/k (expval->proc val1) val saved-cont))
     ))
 
 (define (value-of/k exp env cont)
