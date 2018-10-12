@@ -43,9 +43,15 @@
 
 (define (value-of/k)
   (cases expression exp
-    (const-exp (num) '())
-    (var-exp (var) '())
-    (proc-exp (var body) '())
+    (const-exp (num)
+      (set! val (num-val num))
+      (apply-cont))
+    (var-exp (var)
+      (set! val (apply-env env var))
+      (apply-cont))
+    (proc-exp (var body)
+      (set! val (proc-val (procedure var body env)))
+      (apply-cont))
     (letrec-exp (p-name b-var p-body letrec-body) '())
     (zero?-exp (exp1) '())
     (let-exp (var exp1 body) '())
