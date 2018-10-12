@@ -1,3 +1,9 @@
+(define exp 'uninitialized)
+(define env 'uninitialized)
+(define cont 'uninitialized)
+(define val 'uninitialized)
+(define proc1 'uninitialized)
+
 (define-datetype continuation continuation?
   (end-cont)
   (zero1-cont
