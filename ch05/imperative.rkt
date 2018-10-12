@@ -32,3 +32,11 @@
   (rand-cont
     (val1 expval?)
     (saved-cont continuation?)))
+
+(define (value-of-program pgm)
+  (cases program pgm
+    (a-program (exp1)
+      (set! cont (end-cont))
+      (set! exp exp1)
+      (set! env (init-env))
+      (value-of/k))))
