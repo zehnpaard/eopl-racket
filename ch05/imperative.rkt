@@ -40,3 +40,16 @@
       (set! exp exp1)
       (set! env (init-env))
       (value-of/k))))
+
+(define (value-of/k)
+  (cases expression exp
+    (const-exp (num) '())
+    (var-exp (var) '())
+    (proc-exp (var body) '())
+    (letrec-exp (p-name b-var p-body letrec-body) '())
+    (zero?-exp (exp1) '())
+    (let-exp (var exp1 body) '())
+    (if-exp (exp1 exp2 exp3) '())
+    (diff-exp (exp1 exp2) '())
+    (call-exp (rator rand) '())
+    ))
