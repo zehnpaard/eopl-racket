@@ -83,4 +83,8 @@
     (end-cont ()
       (eopl:printf "End of computation.~%")
       val)
+    (zero1-cont (saved-cont)
+      (set! cont saved-cont)
+      (set! val (bool-val (zero? (expval->num val))))
+      (apply-cont))
     ))
