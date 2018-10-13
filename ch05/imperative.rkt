@@ -77,3 +77,10 @@
       (set! exp rator)
       (value-of/k))
     ))
+
+(define (apply-cont)
+  (cases continuation cont
+    (end-cont ()
+      (eopl:printf "End of computation.~%")
+      val)
+    ))
