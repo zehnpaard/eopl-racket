@@ -117,3 +117,10 @@
       (set! proc1 val1)
       (apply-procedure/k))
     ))
+
+(define (apply-procedure/k)
+  (cases proc proc1
+    (procedure (var body saved-env)
+      (set! exp body)
+      (set! env (extend-env var val saved-env))
+      (value-of/k))))
