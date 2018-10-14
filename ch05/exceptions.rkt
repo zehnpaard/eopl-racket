@@ -59,6 +59,13 @@
   (rand-cont
     (val1 expval?)
     (cont continuation?))
+  (try-cont
+    (var identifier?)
+    (handler-exp expression?)
+    (env environment?)
+    (cont continuation?))
+  (raise1-cont
+    (saved-cont continuation?))
   )
 
 (define (apply-cont cont val)
