@@ -104,3 +104,8 @@
       (apply-handler val saved-cont))
     ))
 
+(define (apply-handler val cont)
+  (cases continuation cont
+    (try-cont (var handler-exp saved-env saved-cont)
+      (value-of/k handler-exp (extend-env var val saved-env) saved-cont))
+    ))
