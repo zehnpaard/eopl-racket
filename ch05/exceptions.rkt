@@ -24,6 +24,8 @@
       (value-of/k exp1 env (diff1-cont exp2 env cont)))
     (call-exp (rator rand)
       (value-of/k rator env (rator-cont rand env cont)))
+    (try-exp (exp1 var handler-exp)
+      (value-of/k exp1 env (try-cont var handler-exp env cont)))
     ))
 
 (define (apply-procedure/k proc1 arg1 cont)
