@@ -98,5 +98,9 @@
       (value-of/k rand saved-env (rand-cont val saved-cont)))
     (rand-cont (val1 saved-cont)
       (apply-procedure/k (expval->proc val1) val saved-cont))
+    (try-cont (var handler-exp saved-env saved-cont)
+      (apply-cont saved-cont val))
+    (raise1-cont (saved-cont)
+      (apply-handler val saved-cont))
     ))
 
