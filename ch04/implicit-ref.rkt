@@ -14,7 +14,7 @@
         (value-of true-e env1)
         (value-of false-e env1)))
     (let-exp (v e1 e2)
-      (value-of e2 (extend-env v (value-of e1 env1) env1)))
+      (value-of e2 (extend-env v (newref (value-of e1 env1)) env1)))
     (proc-exp (v e1)
       (proc-val (procedure v e1 env1)))
     (call-exp (e1 e2)
