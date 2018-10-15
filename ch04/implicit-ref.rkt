@@ -27,6 +27,11 @@
         (num-val 27)))
     ))
 
+(define (apply-procedure proc1 val)
+  (cases proc proc1
+    (procedure (var body saved-env)
+      (value-of body (extend-env var (newref val) saved-env)))))
+
 ; store
 (define (empty-store)
   '())
