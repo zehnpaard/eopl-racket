@@ -21,6 +21,10 @@
       (apply-procedure
        (expval->proc (value-of e1 env1))
        (value-of e2 env1)))
+    (assign-exp (var exp1)
+      (begin
+        (setref! (apply-env env var) (value-of exp1 env))
+        (num-val 27)))
     ))
 
 ; store
