@@ -20,7 +20,7 @@
     (call-exp (rator rand)
       (value-of/k rator env (rator-cont rand env cont)))
     (assign-exp (var exp1)
-      (value-of/k exp1 env (assign1-cont env var cont)))
+      (value-of/k exp1 env (assign1-cont var env cont)))
     ))
 
 (define (apply-procedure proc1 val)
@@ -57,6 +57,10 @@
     (saved-cont continuation?))
   (rand-cont
     (val1 expval?)
+    (saved-cont continuation?))
+  (assign1-cont
+    (var identifier?)
+    (saved-env environment?)
     (saved-cont continuation?)))
 
 ; store
