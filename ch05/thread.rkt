@@ -50,6 +50,10 @@
       (value-of/k rand saved-env (rand-cont val saved-cont)))
     (rand-cont (val1 saved-cont)
       (apply-procedure/k (expval->proc val1) val saved-cont))
+    (assign1-cont (var saved-env saved-cont)
+      (begin
+        (setref! (apply-env saved-env var) val)
+        (apply-cont saved-cont (num-val 27))))
     ))
 
 (define (apply-procedure proc1 val)
