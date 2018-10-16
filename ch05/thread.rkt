@@ -20,9 +20,7 @@
     (call-exp (rator rand)
       (value-of/k rator env (rator-cont rand env cont)))
     (assign-exp (var exp1)
-      (begin
-        (setref! (apply-env env var) (value-of exp1 env))
-        (apply-cont cont (num-val 27))))
+      (value-of/k exp1 env (assign1-cont env var cont)))
     ))
 
 (define (apply-procedure proc1 val)
