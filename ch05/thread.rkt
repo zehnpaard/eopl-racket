@@ -22,7 +22,7 @@
     (assign-exp (var exp1)
       (begin
         (setref! (apply-env env var) (value-of exp1 env))
-        (num-val 27)))
+        (apply-cont cont (num-val 27))))
     ))
 
 (define (apply-procedure proc1 val)
