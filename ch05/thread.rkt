@@ -20,7 +20,7 @@
     (call-exp (rator rand)
       (value-of/k rator env (rator-cont rand env cont)))
     (assign-exp (var exp1)
-      (value-of/k exp1 env (assign1-cont var env cont)))
+      (value-of/k exp1 env (assign-cont var env cont)))
     ))
 
 
@@ -50,7 +50,7 @@
       (value-of/k rand saved-env (rand-cont val saved-cont)))
     (rand-cont (val1 saved-cont)
       (apply-procedure/k (expval->proc val1) val saved-cont))
-    (assign1-cont (var saved-env saved-cont)
+    (assign-cont (var saved-env saved-cont)
       (begin
         (setref! (apply-env saved-env var) val)
         (apply-cont saved-cont (num-val 27))))
@@ -91,7 +91,7 @@
   (rand-cont
     (val1 expval?)
     (saved-cont continuation?))
-  (assign1-cont
+  (assign-cont
     (var identifier?)
     (saved-env environment?)
     (saved-cont continuation?)))
