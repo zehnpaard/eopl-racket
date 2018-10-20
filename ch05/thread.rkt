@@ -105,6 +105,8 @@
   (assign-cont
     (var identifier?)
     (saved-env environment?)
+    (saved-cont continuation?))
+  (spawn-cont
     (saved-cont continuation?)))
 
 ; store
