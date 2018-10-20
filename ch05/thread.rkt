@@ -150,3 +150,13 @@
         (set! the-ready-queue other-ready-threads)
         (set! the-time-remaining the-max-time-slice)
         (first-ready-thread)))))
+
+(define (set-final-answer! val)
+  (set! the-final-answer val))
+
+(define (time-expired?)
+  (zero? the-time-remaining))
+
+(define (decrement-timer!)
+  (set! the-time-remaining 
+    (- the-time-remaining 1)))
