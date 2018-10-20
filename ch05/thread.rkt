@@ -1,3 +1,10 @@
+(define (value-of-program timeslice pgm)
+  (initialize-store!)
+  (initialize-scheduler! timeslice)
+  (cases program pgm
+    (a-program (exp1)
+      (value-of/k exp1 (init-env) (end-main-thread-cont)))))
+
 (define (value-of/k exp env cont)
   (cases expression exp
     (const-exp (num)
