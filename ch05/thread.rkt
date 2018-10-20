@@ -133,6 +133,11 @@
 
 ; Scheduler
 
+(define the-ready-queue '())
+(define the-final-answer '())
+(define the-max-time-slice '())
+(define the-time-remaining '())
+
 (define (initialize-scheduler ticks)
   (set! the-ready-queue (empty-queue))
   (set! the-final-answer 'uninitialized)
