@@ -65,6 +65,12 @@
               (num-val 28)
               (end-subthread-cont))))
         (apply-cont saved-cont (num-val 73))))
+    (end-main-thread-cont ()
+      (begin
+        (set-final-answer! val)
+        (run-next-thread)))
+    (end-subthread-cont ()
+      (run-next-thread))
     ))
 
 (define (apply-procedure proc1 val)
@@ -107,7 +113,10 @@
     (saved-env environment?)
     (saved-cont continuation?))
   (spawn-cont
-    (saved-cont continuation?)))
+    (saved-cont continuation?))
+  (end-main-thread-cont)
+  (end-subthread-cont)
+  )
 
 ; store
 (define (empty-store)
