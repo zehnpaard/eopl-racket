@@ -21,6 +21,8 @@
       (value-of/k rator env (rator-cont rand env cont)))
     (assign-exp (var exp1)
       (value-of/k exp1 env (assign-cont var env cont)))
+    (spawn-exp (exp1)
+      (value-of/k exp1 env (spawn-cont cont)))
     ))
 
 
@@ -54,6 +56,15 @@
       (begin
         (setref! (apply-env saved-env var) val)
         (apply-cont saved-cont (num-val 27))))
+    (spawn-cont (saved-cont)
+      (begin
+        (place-on-ready-queue!
+          (lambda ()
+            (apply-procedure/k
+              (expval->proc val)
+              (num-val 28)
+              (end-subthread-cont))))
+        (apply-cont saved-cont (num-val 73))))
     ))
 
 (define (apply-procedure proc1 val)
