@@ -138,3 +138,15 @@
   (set! the-final-answer 'uninitialized)
   (set! the-max-time-slice ticks)
   (set! the-time-remaining the-max-time-slice))
+
+(define (place-on-ready-queue! thread1)
+  (set! the-ready-queue (enqueue the-ready-queue thread1)))
+
+(define (run-next-thread)
+  (if (empty? the-ready-queue)
+    the-final-answer
+    (dequeue the-ready-queue
+      (lambda (first-ready-thread other-ready-threads)
+        (set! the-ready-queue other-ready-threads)
+        (set! the-time-remaining the-max-time-slice)
+        (first-ready-thread)))))
