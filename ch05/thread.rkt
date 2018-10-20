@@ -131,4 +131,10 @@
         (setref-inner (cdr store1) (- ref1 1))))))
   (set! the-store (setref-inner the-store ref)))
 
+; Scheduler
 
+(define (initialize-scheduler ticks)
+  (set! the-ready-queue (empty-queue))
+  (set! the-final-answer 'uninitialized)
+  (set! the-max-time-slice ticks)
+  (set! the-time-remaining the-max-time-slice))
