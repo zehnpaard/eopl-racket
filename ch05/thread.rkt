@@ -32,6 +32,8 @@
       (value-of/k exp1 env (spawn-cont cont)))
     (mutex-exp ()
       (apply-cont cont (mutex-val (new-mutex))))
+    (wait-exp (exp1)
+      (value-of/k exp1 env (wait-cont cont)))
     ))
 
 
@@ -89,8 +91,8 @@
           (run-next-thread))
         (wait-cont (saved-cont)
           (wait-for-mutex
-            (expval->mutex val))
-          (lambda () (apply-cont saed-cont (num-val 52))))
+            (expval->mutex val)
+            (lambda () (apply-cont saved-cont (num-val 52)))))
   ))))
 
 (define (apply-procedure proc1 val)
