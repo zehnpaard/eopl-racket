@@ -30,6 +30,8 @@
       (value-of/k exp1 env (assign-cont var env cont)))
     (spawn-exp (exp1)
       (value-of/k exp1 env (spawn-cont cont)))
+    (mutex-exp ()
+      (apply-cont cont (mutex-val (new-mutex))))
     ))
 
 
@@ -207,3 +209,6 @@
   (a-mutex
     (ref-to-closed? reference?)
     (ref-to-wait-queue reference?)))
+
+(define (new-mutex)
+  (a-mutex (newref #f) (newref '())))
