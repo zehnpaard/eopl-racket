@@ -87,6 +87,10 @@
             (run-next-thread)))
         (end-subthread-cont ()
           (run-next-thread))
+        (wait-cont (saved-cont)
+          (wait-for-mutex
+            (expval->mutex val))
+          (lambda () (apply-cont saed-cont (num-val 52))))
   ))))
 
 (define (apply-procedure proc1 val)
@@ -132,6 +136,8 @@
     (saved-cont continuation?))
   (end-main-thread-cont)
   (end-subthread-cont)
+  (wait-cont
+    (saved-cont continuation?))
   )
 
 ; store
