@@ -201,3 +201,9 @@
 (define (decrement-timer!)
   (set! the-time-remaining 
     (- the-time-remaining 1)))
+
+;mutex
+(define-datetype mutex mutex?
+  (a-mutex
+    (ref-to-closed? reference?)
+    (ref-to-wait-queue reference?)))
