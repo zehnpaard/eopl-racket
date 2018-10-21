@@ -218,3 +218,14 @@
 
 (define (new-mutex)
   (a-mutex (newref #f) (newref '())))
+
+(define (wait-for-mutex m th)
+  (cases mutex m
+    (a-mutex (ref-to-closed? ref-to-wait-queue)
+      (cond ((deref ref-to-closed?)
+             (setref! ref-to-wait-queue
+                      (enqueue (deref ref-to-wait-queue) th))
+             (run-next-thread))
+            (else
+             (setref! ref-to-closed? #t)
+             (th))))))
