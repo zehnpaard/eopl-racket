@@ -30,6 +30,12 @@
       (value-of/k exp1 env (assign-cont var env cont)))
     (spawn-exp (exp1)
       (value-of/k exp1 env (spawn-cont cont)))
+    (mutex-exp ()
+      (apply-cont cont (mutex-val (new-mutex))))
+    (wait-exp (exp1)
+      (value-of/k exp1 env (wait-cont cont)))
+    (signal-exp (exp1)
+      (value-of/k exp1 env (signal-cont cont)))
     ))
 
 
@@ -85,6 +91,14 @@
             (run-next-thread)))
         (end-subthread-cont ()
           (run-next-thread))
+        (wait-cont (saved-cont)
+          (wait-for-mutex
+            (expval->mutex val)
+            (lambda () (apply-cont saved-cont (num-val 52)))))
+        (signal-cont (saved-cont)
+          (signal-mutex
+            (expval->mutex val)
+            (lambda () (apply-cont saved-cont (num-val 53)))))
   ))))
 
 (define (apply-procedure proc1 val)
@@ -130,6 +144,8 @@
     (saved-cont continuation?))
   (end-main-thread-cont)
   (end-subthread-cont)
+  (wait-cont
+    (saved-cont continuation?))
   )
 
 ; store
@@ -201,3 +217,39 @@
 (define (decrement-timer!)
   (set! the-time-remaining 
     (- the-time-remaining 1)))
+
+;mutex
+(define-datetype mutex mutex?
+  (a-mutex
+    (ref-to-closed? reference?)
+    (ref-to-wait-queue reference?)))
+
+(define (new-mutex)
+  (a-mutex (newref #f) (newref '())))
+
+(define (wait-for-mutex m th)
+  (cases mutex m
+    (a-mutex (ref-to-closed? ref-to-wait-queue)
+      (cond ((deref ref-to-closed?)
+             (setref! ref-to-wait-queue
+                      (enqueue (deref ref-to-wait-queue) th))
+             (run-next-thread))
+            (else
+             (setref! ref-to-closed? #t)
+             (th))))))
+
+(define top-of-queue car)
+(define rest-of-queue cdr)
+
+(define (signal-mutex m th)
+  (cases mutex m
+    (a-mutex (ref-to-closed? ref-to-wait-queue)
+      (let ((wait-queue (deref ref-to-wait-queue)))
+        (if (deref ref-to-closed?)
+          (if (empty? wait-queue)
+            (setref! ref-to-closed? #f)
+            (begin
+              (place-on-ready-queue! (top-of-queue wait-queue))
+              (setref! ref-to-wait-queue (rest-of-queue wait-queue)))))
+        (th)))))
+
