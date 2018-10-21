@@ -235,3 +235,19 @@
             (else
              (setref! ref-to-closed? #t)
              (th))))))
+
+(define top-of-queue car)
+(define rest-of-queue cdr)
+
+(define (signal-mutex m th)
+  (cases mutex m
+    (a-mutex (ref-to-closed? ref-to-wait-queue)
+      (let ((wait-queue (deref ref-to-wait-queue)))
+        (if (deref ref-to-closed?)
+          (if (empty? wait-queue)
+            (setref! ref-to-closed? #f)
+            (begin
+              (place-on-ready-queue! (top-of-queue wait-queue))
+              (setref! ref-to-wait-queue (rest-of-queue wait-queue)))))
+        (th)))))
+
