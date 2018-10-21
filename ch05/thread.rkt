@@ -34,6 +34,8 @@
       (apply-cont cont (mutex-val (new-mutex))))
     (wait-exp (exp1)
       (value-of/k exp1 env (wait-cont cont)))
+    (signal-exp (exp1)
+      (value-of/k exp1 env (signal-cont cont)))
     ))
 
 
