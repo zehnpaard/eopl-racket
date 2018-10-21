@@ -93,6 +93,10 @@
           (wait-for-mutex
             (expval->mutex val)
             (lambda () (apply-cont saved-cont (num-val 52)))))
+        (signal-cont (saved-cont)
+          (signal-mutex
+            (expval->mutex val)
+            (lambda () (apply-cont saved-cont (num-val 53)))))
   ))))
 
 (define (apply-procedure proc1 val)
