@@ -12,3 +12,10 @@
   (fact1-cont
     (n integer?)
     (cont continuation?)))
+
+(define (apply-cont cont val)
+  (cases continuation cont
+    (end-cont ()
+      val)
+    (fact1-cont (n saved-cont)
+      (apply-cont saved-cont (* n val)))))
