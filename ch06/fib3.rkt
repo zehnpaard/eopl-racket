@@ -6,15 +6,16 @@
     (apply-cont cont 1)
     (fib/k (- n 1) (fib1-cont n cont))))
 
-(define-datatype continuation continuation?
-  (empty-cont)
-  (fib1-cont (n saved-cont))
-  (fib2-cont (v saved-cont)))
+(define (empty-cont)
+  (lambda (val) val))
+
+(define (fib1-cont n saved-cont)
+  (lambda (val)
+    (fib/k (- n 1) (fib2-cont val saved-cont))))
+
+(define (fib2-cont v saved-cont)
+  (lambda (val)
+    (apply-cont saved-cont (+ v val))))
 
 (define (apply-cont cont val)
-  (cases continuation cont
-    (empty-cont () val)
-    (fib1-cont (n saved-cont)
-      (fib/k (- n 2) (fib2-cont val saved-cont)))
-    (fib2-cont (v saved-cont)
-      (apply-cont saved-cont (+ v val)))))
+  (cont val))
