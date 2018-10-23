@@ -11,7 +11,7 @@
 
 (define (fib1-cont n saved-cont)
   (lambda (val)
-    (fib/k (- n 1) (fib2-cont val saved-cont))))
+    (fib/k (- n 2) (fib2-cont val saved-cont))))
 
 (define (fib2-cont v saved-cont)
   (lambda (val)
