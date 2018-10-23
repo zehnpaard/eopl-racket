@@ -7,15 +7,12 @@
     (apply-cont cont 1)
     (fact/k (- n 1) (fact1-cont n cont))))
 
-(define-datatype continuation continuation?
-  (end-cont)
-  (fact1-cont
-    (n integer?)
-    (cont continuation?)))
+(define (end-cont)
+  (lambda (val) val))
+
+(define (fact1-cont n saved-cont)
+  (lambda (val) 
+    (apply-cont saved-cont (* n val))))
 
 (define (apply-cont cont val)
-  (cases continuation cont
-    (end-cont ()
-      val)
-    (fact1-cont (n saved-cont)
-      (apply-cont saved-cont (* n val)))))
+  (cont val))
