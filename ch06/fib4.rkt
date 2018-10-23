@@ -1,0 +1,11 @@
+(define (fib n)
+  (fib/k n (lambda (val) val)))
+
+(define (fib/k n cont)
+  (if (< n 2)
+    (cont 1)
+    (fib/k (- n 1)
+           (lambda (val1)
+             (fib/k (- n 2)
+                    (lambda (val2)
+                      (cont (+ val1 val2))))))))
